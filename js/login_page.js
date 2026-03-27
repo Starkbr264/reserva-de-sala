@@ -1,0 +1,60 @@
+window.addEventListener('DOMContentLoaded', function() {
+  initDados();
+  initTema();
+  seJaLogado();
+  initLogo();
+
+  // Popula unidades
+  (function() {
+    var sel = document.getElementById('selUnidade');
+    var uns = getUnidades();
+    if (!uns.length) {
+      var o = document.createElement('option');
+      o.value = ''; o.textContent = 'Nenhuma unidade cadastrada';
+      sel.innerHTML = ''; sel.appendChild(o);
+    } else {
+      uns.forEach(function(u) {
+        var o = document.createElement('option');
+        o.value = u.id;
+        o.textContent = u.nome + (u.cep ? ' — ' + u.cep : '');
+        sel.appendChild(o);
+      });
+    }
+  })();
+
+  document.getElementById('fLogin').addEventListener('submit', function(ev) {
+    ev.preventDefault();
+    var email = document.getElementById('inpEmail').value.trim();
+    var senha = document.getElementById('inpSenha').value;
+    var uid   = parseInt(document.getElementById('selUnidade').value) || null;
+    var msg   = document.getElementById('loginMsg');
+
+    function erro(txt) {
+      msg.className = 'login-msg erro'; msg.textContent = txt; msg.style.display = 'block';
+    }
+
+    if (!email || !senha) { erro('Preencha e-mail e senha.'); return; }
+
+    var u = loginUser(email, senha);
+    if (!u) {
+      erro('E-mail ou senha incorretos.');
+      document.getElementById('inpSenha').value = '';
+      document.getElementById('inpSenha').focus();
+      return;
+    }
+
+    // Admin não precisa selecionar unidade
+    if (u.perfil !== 'admin') {
+      if (!uid && getUnidades().length > 0) { erro('Selecione sua unidade.'); return; }
+      if (u.unidadeId && uid && u.unidadeId !== uid) { erro('Unidade incorreta para este usuário.'); return; }
+    }
+
+    setSessao(Object.assign({}, u, { unidadeId: u.unidadeId || uid }));
+    msg.className = 'login-msg ok';
+    msg.textContent = 'Acesso autorizado! Redirecionando…';
+    msg.style.display = 'block';
+
+    var rotas = { admin:'admin.html', coordenador:'coordenador.html', instrutor:'instrutor.html', recepcao:'recepcao.html' };
+    setTimeout(function(){ window.location.href = rotas[u.perfil] || 'login.html'; }, 500);
+  });
+});
