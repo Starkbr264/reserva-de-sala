@@ -1,0 +1,48 @@
+/* ================================================================
+   buttons.css — Botões (primário, danger, ghost, sm, xs)
+   ================================================================ */
+.btn {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: .875rem;
+  padding: 9px 20px;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: var(--t);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.btn:hover  { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); box-shadow: var(--shadow-md); }
+
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: #047857; }
+
+.btn-danger  { background: var(--red-l); color: var(--red); border: 1px solid rgba(220,38,38,.3); }
+.btn-danger:hover  { background: var(--red); color: #fff; }
+
+.btn-warning { background: var(--amber-l); color: var(--amber); border: 1px solid rgba(217,119,6,.3); }
+.btn-warning:hover { background: var(--amber); color: #fff; }
+
+.btn-ghost   { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+.btn-ghost:hover   { background: var(--surface2); color: var(--text); }
+
+/* Tamanhos */
+.btn-sm { padding: 5px 12px; font-size: .78rem; }
+.btn-xs { padding: 3px  9px; font-size: .72rem; }
+
+/* Estilos dashboard.html (namespace diferente, mantidos para compatibilidade) */
+.btn-success-sm { padding: 5px 12px; font-size: .78rem; background: var(--green);  color:#fff; border:none; border-radius:var(--r); cursor:pointer; transition:var(--t); }
+.btn-warning-sm { padding: 5px 12px; font-size: .78rem; background: var(--amber-l);color:var(--amber); border:1px solid rgba(217,119,6,.3); border-radius:var(--r); cursor:pointer; transition:var(--t); }
+.btn-danger-sm  { padding: 5px 12px; font-size: .78rem; background: var(--red-l);  color:var(--red);   border:1px solid rgba(220,38,38,.3); border-radius:var(--r); cursor:pointer; transition:var(--t); }
+
+@media (max-width: 600px) {
+  .modal-foot            { flex-direction: column; }
+  .modal-foot .btn       { width: 100%; justify-content: center; }
+}
