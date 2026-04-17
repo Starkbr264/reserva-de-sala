@@ -71,7 +71,7 @@ function verificarDisponibilidade() {
   if (ocupadas.length === 0) {
     result.className = 'disp-result livre';
     result.innerHTML = `
-      <span class="disp-icon">✅</span>
+      <span class="disp-icon"><i class="ph ph-check-circle"></i></span>
       <div>
         <strong>LIVRE</strong>
         <div style="font-size:.88rem;font-weight:400;margin-top:4px;opacity:.8">
@@ -85,7 +85,7 @@ function verificarDisponibilidade() {
     });
     result.className = 'disp-result ocupada';
     result.innerHTML = `
-      <span class="disp-icon">❌</span>
+      <span class="disp-icon"><i class="ph ph-x-circle"></i></span>
       <div>
         <strong>OCUPADA</strong>
         <div style="font-size:.88rem;font-weight:400;margin-top:4px;opacity:.9">

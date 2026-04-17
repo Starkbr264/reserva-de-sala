@@ -62,7 +62,7 @@ function _calcSalaStatusRec(s, hj) {
 }
 
 function _buildSalaCardRec(s, info) {
-  var statusIcon = {livre:'🟢',ocupada:'🔴',iminente:'🟡'}[info.stat]||'🟢';
+  var statusIcon = {livre:'<span class="ic-dot ic-livre"></span>',ocupada:'<span class="ic-dot ic-ocupada"></span>',iminente:'<span class="ic-dot ic-iminente"></span>'}[info.stat]||'<span class="ic-dot ic-livre"></span>';
   var turnos = s.turnos||s.turnosDisponiveis||[];
   var uid = s.unidadeId||_uid();
 
@@ -78,17 +78,17 @@ function _buildSalaCardRec(s, info) {
     ocupHtml = '<div class="sc-ocupacao">';
     if (info.override) {
       ocupHtml += '<div class="sc-periodo sc-override">'
-        +'<span class="sc-periodo-turno '+(info.stat==='ocupada'?'ocp':'imi')+'">⚙️ Manual</span>'
+        +'<span class="sc-periodo-turno '+(info.stat==='ocupada'?'ocp':'imi')+'"><i class="ph ph-gear"></i>️ Manual</span>'
         +'<div class="sc-turma">'+esc(info.override.motivo||'Status manual')+'</div>'
         +'<div class="sc-inst">por '+esc(info.override.por)+'</div>'
         +'</div>';
     } else {
       info.periodos.forEach(function(per){
-        var ic = per.stat==='ocupada'?'🔴':'🟡';
+        var ic = per.stat==='ocupada'?'<span class="ic-dot ic-ocupada"></span>':'<span class="ic-dot ic-iminente"></span>';
         ocupHtml += '<div class="sc-periodo">'
           +'<span class="sc-periodo-turno '+(per.stat==='ocupada'?'ocp':'imi')+'">'+ic+' '+esc(per.turno)+'</span>'
-          +'<div class="sc-turma">📚 '+esc(per.turmaNome)+'</div>'
-          +(per.instNome?'<div class="sc-inst">👤 '+esc(per.instNome)+'</div>':'')
+          +'<div class="sc-turma"><i class="ph ph-books"></i> '+esc(per.turmaNome)+'</div>'
+          +(per.instNome?'<div class="sc-inst"><i class="ph ph-user"></i> '+esc(per.instNome)+'</div>':'')
           +'</div>';
       });
     }
@@ -102,20 +102,20 @@ function _buildSalaCardRec(s, info) {
   var ovIminn = info.stat==='iminente' ? 'ov-active' : '';
   var ovLivre = (info.stat==='livre' && !info.override) ? 'ov-active' : '';
   var ovBtn = '<div class="sc-override-bar">'
-    +'<button class="sc-ov-btn '+ovOcup+'"  data-sid="'+sid+'" data-uid="'+uid+'" data-st="ocupada"  onclick="ovClickRec(this)" title="Marcar Ocupada">🔴</button>'
-    +'<button class="sc-ov-btn '+ovIminn+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="iminente" onclick="ovClickRec(this)" title="Marcar Em Breve">🟡</button>'
-    +'<button class="sc-ov-btn '+ovLivre+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="livre"    onclick="ovClickRec(this)" title="Marcar Livre">🟢</button>'
+    +'<button class="sc-ov-btn '+ovOcup+'"  data-sid="'+sid+'" data-uid="'+uid+'" data-st="ocupada"  onclick="ovClickRec(this)" title="Marcar Ocupada"><span class="ic-dot ic-ocupada"></span></button>'
+    +'<button class="sc-ov-btn '+ovIminn+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="iminente" onclick="ovClickRec(this)" title="Marcar Em Breve"><span class="ic-dot ic-iminente"></span></button>'
+    +'<button class="sc-ov-btn '+ovLivre+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="livre"    onclick="ovClickRec(this)" title="Marcar Livre"><span class="ic-dot ic-livre"></span></button>'
     +(info.override?'<button class="sc-ov-btn sc-ov-auto" data-sid="'+sid+'" data-uid="'+uid+'" data-st="auto" onclick="ovClickRec(this)" title="Voltar ao automático">⟳ Auto</button>':'')
     +'</div>';
 
   return '<div class="sala-card-v2 '+info.stat+(info.override?' has-override':'')+'">'
-    +'<div class="sc-header"><div class="sc-nome">'+esc(s.nome)+(info.override?'<span class="sc-ov-tag">⚙️</span>':'')+'</div>'
+    +'<div class="sc-header"><div class="sc-nome">'+esc(s.nome)+(info.override?'<span class="sc-ov-tag"><i class="ph ph-gear"></i>️</span>':'')+'</div>'
     +'<div class="sc-status-dot '+info.stat+'"></div></div>'
     +'<div class="sc-tipo">'+esc(s.tipo)+'</div>'
     +'<div class="sc-meta">'
-      +'<div class="sc-meta-item"><span class="sc-meta-icon">🏢</span>'+esc(s.andar||'—')+'</div>'
-      +'<div class="sc-meta-item"><span class="sc-meta-icon">📍</span>'+esc(s.bloco||'—')+'</div>'
-      +'<div class="sc-meta-item"><span class="sc-meta-icon">👥</span>'+s.capacidade+'</div>'
+      +'<div class="sc-meta-item"><span class="sc-meta-icon"><i class="ph ph-buildings"></i></span>'+esc(s.andar||'—')+'</div>'
+      +'<div class="sc-meta-item"><span class="sc-meta-icon"><i class="ph ph-map-pin"></i></span>'+esc(s.bloco||'—')+'</div>'
+      +'<div class="sc-meta-item"><span class="sc-meta-icon"><i class="ph ph-users"></i></span>'+s.capacidade+'</div>'
     +'</div>'
     +'<div class="sc-turnos">'+turnosHtml+'</div>'
     +ocupHtml+ovBtn
@@ -187,9 +187,9 @@ function rdMapa() {
   var ocupadas=salasFiltradas.filter(function(s){return infoMap[s.id].stat==='ocupada';}).length;
   var iminentes=salasFiltradas.filter(function(s){return infoMap[s.id].stat==='iminente';}).length;
   var legEl=document.getElementById('mapaRecLegenda');
-  if(legEl) legEl.innerHTML='<span class="leg-item livre">🟢 Livre: '+livres+'</span>'
-    +'<span class="leg-item ocupada">🔴 Ocupada: '+ocupadas+'</span>'
-    +'<span class="leg-item iminente">🟡 Em breve: '+iminentes+'</span>'
+  if(legEl) legEl.innerHTML='<span class="leg-item livre"><span class="ic-dot ic-livre"></span> Livre: '+livres+'</span>'
+    +'<span class="leg-item ocupada"><span class="ic-dot ic-ocupada"></span> Ocupada: '+ocupadas+'</span>'
+    +'<span class="leg-item iminente"><span class="ic-dot ic-iminente"></span> Em breve: '+iminentes+'</span>'
     +'<span class="leg-total">Total: '+salasFiltradas.length+'</span>';
 
   if(!salasFiltradas.length){cont.innerHTML='<p class="txt2" style="padding:24px">Nenhuma sala com esses filtros.</p>';return;}
@@ -204,9 +204,9 @@ function rdMapa() {
 
   var html='';
   Object.keys(grupos).sort().forEach(function(bloco){
-    html+='<div class="mapa-bloco"><div class="mapa-bloco-titulo">📍 '+esc(bloco)+'</div>';
+    html+='<div class="mapa-bloco"><div class="mapa-bloco-titulo"><i class="ph ph-map-pin"></i> '+esc(bloco)+'</div>';
     Object.keys(grupos[bloco]).sort().forEach(function(andar){
-      html+='<div class="mapa-andar"><div class="mapa-andar-titulo">🏢 '+esc(andar)+'</div>';
+      html+='<div class="mapa-andar"><div class="mapa-andar-titulo"><i class="ph ph-buildings"></i> '+esc(andar)+'</div>';
       html+='<div class="mapa-andar-grid">';
       grupos[bloco][andar].forEach(function(s){ html+=_buildSalaCardRec(s,infoMap[s.id]); });
       html+='</div></div>';
@@ -237,7 +237,7 @@ function rdChaves() {
   cont.innerHTML=list.map(function(c){
     var sala=getSalaById(c.salaId); var pega=c.status==='pega'; var quem=pega&&c.instrutorId?getUserById(c.instrutorId):null;
     return '<div class="chave-card '+(pega?'pega':'disponivel')+'">'
-      +'<div class="ch-icon">'+(pega?'🔑':'🗝️')+'</div>'
+      +'<div class="ch-icon">'+(pega?'<i class="ph ph-key"></i>':'<i class="ph ph-key"></i>️')+'</div>'
       +'<div class="ch-info"><div class="ch-nome">'+esc(sala?sala.nome:'—')+' — '+esc(c.codigo||'Chave')+'</div>'
       +'<div class="ch-det">Andar: '+esc(c.andar||'—')+' · <strong>'+(pega?'Retirada':'Disponível')+'</strong></div>'
       +(quem?'<div class="ch-det">Retirada por: '+esc(quem.nome)+(c.pegaEm?' em '+fmtDateTime(c.pegaEm):'')+'</div>':'')
@@ -314,7 +314,7 @@ function _renderChavRec() {
   cont.innerHTML = list.map(function(c){
     var sala=getSalaById(c.salaId); var pega=c.status==='pega'; var quem=pega&&c.instrutorId?getUserById(c.instrutorId):null;
     return '<div class="chave-card '+(pega?'pega':'disponivel')+'">'
-      +'<div class="ch-icon">'+(pega?'🔑':'🗝️')+'</div>'
+      +'<div class="ch-icon">'+(pega?'<i class="ph ph-key"></i>':'<i class="ph ph-key"></i>️')+'</div>'
       +'<div class="ch-info"><div class="ch-nome">'+esc(sala?sala.nome:'—')+' — '+esc(c.codigo||'Chave')+'</div>'
       +'<div class="ch-det">Andar: '+esc(c.andar||'—')+' · <strong>'+(pega?'Retirada':'Disponível')+'</strong></div>'
       +(quem?'<div class="ch-det">Por: '+esc(quem.nome)+(c.pegaEm?' em '+fmtDateTime(c.pegaEm):'')+'</div>':'')

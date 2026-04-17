@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instrutor — SENAC Reservas</title>
 
@@ -34,7 +35,7 @@
   <div class="main">
     <header class="topbar">
       <div><div class="tb-title" id="tbTitle">Minhas Turmas</div><div class="tb-sub" id="tbSub"></div></div>
-      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()">◐</button></div>
+      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()"><i class="ph ph-moon"></i></button></div>
     </header>
 
     <!-- TURMAS -->
@@ -81,23 +82,25 @@
   <div class="modal-box">
     <div class="modal-title">
       <span>Solicitar Sala: <strong><span id="slNome"></span></strong></span>
-      <button class="modal-close" onclick="modalFechar('modalSolic')" title="Fechar">✕</button>
+      <button class="modal-close" onclick="modalFechar('modalSolic')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <input type="hidden" id="slSalaId">
     <div class="fg">
       <div class="ff">
         <label>Data *</label>
-        <input type="date" id="slData">
+        <input type="date" id="slData" onchange="verificarDisponibilidadeSolic()">
       </div>
       <div class="ff">
         <label>Turnos * <span style="font-weight:400;font-size:.75rem;color:var(--text3)">(selecione um ou mais)</span></label>
         <div class="chips" id="slTurnosChips" style="margin-top:4px">
-          <div class="chip" data-v="Matutino" onclick="this.classList.toggle('ativo')">☀️ Matutino</div>
-          <div class="chip" data-v="Vespertino" onclick="this.classList.toggle('ativo')">🌤️ Vespertino</div>
-          <div class="chip" data-v="Noturno" onclick="this.classList.toggle('ativo')">🌙 Noturno</div>
+          <div class="chip" data-v="Matutino" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-sun"></i> Matutino</div>
+          <div class="chip" data-v="Vespertino" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-cloud-sun"></i> Vespertino</div>
+          <div class="chip" data-v="Noturno" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-moon"></i> Noturno</div>
         </div>
-        <div id="slTurnoErro" style="font-size:.78rem;color:var(--red);margin-top:4px;display:none">Selecione ao menos um turno.</div>
+        <div id="slTurnoErro" style="font-size:.82rem;margin-top:6px;display:none"></div>
       </div>
+      <!-- Banner de disponibilidade em tempo real -->
+      <div id="slDisponibilidade" style="display:none;padding:10px 14px;border-radius:8px;font-size:.83rem;line-height:1.5"></div>
       <div class="ff">
         <label>Motivo / Observação</label>
         <textarea id="slMotivo" placeholder="Descreva o motivo da solicitação..."></textarea>

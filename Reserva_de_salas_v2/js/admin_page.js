@@ -376,7 +376,7 @@ function _renderTbChavAdmin(){
 
 /* ── RESET ── */
 function resetarTodosDados(){
-  if(!confirm('⚠️ Isso vai apagar TODOS os dados e restaurar o padrão.\n\nTem certeza?'))return;
+  if(!confirm('<i class="ph ph-warning"></i>️ Isso vai apagar TODOS os dados e restaurar o padrão.\n\nTem certeza?'))return;
   if(!confirm('Confirme: apagar TUDO e voltar ao estado inicial?'))return;
   localStorage.clear(); toast('Dados resetados! Recarregando…','aviso');
   setTimeout(function(){window.location.reload();},800);

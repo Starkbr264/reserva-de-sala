@@ -213,7 +213,7 @@ function rdReservas() {
       <td>${esc(reservPor?reservPor.nome:'—')}</td>
       <td><span class="${classStatus(st)}">${fmtStatus(st)}</span></td>
       <td style="display:flex;gap:5px;padding:11px 12px">
-        <button class="btn btn-ghost btn-sm" onclick="abrirModalResEditar(${r.id})">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" onclick="abrirModalResEditar(${r.id})"><i class="ph ph-pencil-simple"></i>️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="excluirRes(${r.id})">Excluir</button>
       </td>
     </tr>`;

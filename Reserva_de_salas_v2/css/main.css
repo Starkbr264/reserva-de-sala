@@ -6,6 +6,7 @@
    correspondente abaixo — não há duplicação entre eles.
 
    Ordem:
+     0. icons      → Phosphor icons + status dots
      1. variables  → tokens de design (cores, tamanhos, sombras)
      2. reset      → normalização e utilitários globais
      3. login      → tela de login (login.html)
@@ -25,6 +26,7 @@
    ================================================================ */
 
 @import url('./variables.css');
+@import url('./icons.css');
 @import url('./reset.css');
 @import url('./login.css');
 @import url('./landing.css');

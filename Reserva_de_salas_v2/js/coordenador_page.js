@@ -396,7 +396,7 @@ function _calcSalaStatus(s, hj) {
 }
 
 function _buildSalaCard(s, info) {
-  var statusIcon = {livre:'🟢', ocupada:'🔴', iminente:'🟡'}[info.stat]||'🟢';
+  var statusIcon = {livre:'<span class="ic-dot ic-livre"></span>', ocupada:'<span class="ic-dot ic-ocupada"></span>', iminente:'<span class="ic-dot ic-iminente"></span>'}[info.stat]||'<span class="ic-dot ic-livre"></span>';
   var turnos = s.turnos||s.turnosDisponiveis||[];
   var uid = s.unidadeId||_uid();
 
@@ -414,17 +414,17 @@ function _buildSalaCard(s, info) {
     ocupHtml = '<div class="sc-ocupacao">';
     if (info.override) {
       ocupHtml += '<div class="sc-periodo sc-override">'
-        +'<span class="sc-periodo-turno '+(info.stat==='ocupada'?'ocp':'imi')+'">⚙️ Manual</span>'
+        +'<span class="sc-periodo-turno '+(info.stat==='ocupada'?'ocp':'imi')+'"><i class="ph ph-gear"></i>️ Manual</span>'
         +'<div class="sc-turma">'+esc(info.override.motivo||'Status manual')+'</div>'
         +'<div class="sc-inst">por '+esc(info.override.por)+'</div>'
         +'</div>';
     } else {
       info.periodos.forEach(function(per){
-        var ic = per.stat==='ocupada'?'🔴':'🟡';
+        var ic = per.stat==='ocupada'?'<span class="ic-dot ic-ocupada"></span>':'<span class="ic-dot ic-iminente"></span>';
         ocupHtml += '<div class="sc-periodo">'
           +'<span class="sc-periodo-turno '+(per.stat==='ocupada'?'ocp':'imi')+'">'+ic+' '+esc(per.turno)+'</span>'
-          +'<div class="sc-turma">📚 '+esc(per.turmaNome)+'</div>'
-          +(per.instNome?'<div class="sc-inst">👤 '+esc(per.instNome)+'</div>':'')
+          +'<div class="sc-turma"><i class="ph ph-books"></i> '+esc(per.turmaNome)+'</div>'
+          +(per.instNome?'<div class="sc-inst"><i class="ph ph-user"></i> '+esc(per.instNome)+'</div>':'')
           +'</div>';
       });
     }
@@ -439,22 +439,22 @@ function _buildSalaCard(s, info) {
   var ovIminn = info.stat==='iminente' ? 'ov-active' : '';
   var ovLivre = (info.stat==='livre' && !info.override) ? 'ov-active' : '';
   var ovBtn = '<div class="sc-override-bar">'
-    +'<button class="sc-ov-btn '+ovOcup+'"  data-sid="'+sid+'" data-uid="'+uid+'" data-st="ocupada"   onclick="ovClick(this)" title="Marcar como Ocupada">🔴</button>'
-    +'<button class="sc-ov-btn '+ovIminn+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="iminente" onclick="ovClick(this)" title="Marcar como Em Breve">🟡</button>'
-    +'<button class="sc-ov-btn '+ovLivre+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="livre"     onclick="ovClick(this)" title="Marcar como Livre">🟢</button>'
+    +'<button class="sc-ov-btn '+ovOcup+'"  data-sid="'+sid+'" data-uid="'+uid+'" data-st="ocupada"   onclick="ovClick(this)" title="Marcar como Ocupada"><span class="ic-dot ic-ocupada"></span></button>'
+    +'<button class="sc-ov-btn '+ovIminn+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="iminente" onclick="ovClick(this)" title="Marcar como Em Breve"><span class="ic-dot ic-iminente"></span></button>'
+    +'<button class="sc-ov-btn '+ovLivre+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="livre"     onclick="ovClick(this)" title="Marcar como Livre"><span class="ic-dot ic-livre"></span></button>'
     +(info.override?'<button class="sc-ov-btn sc-ov-auto" data-sid="'+sid+'" data-uid="'+uid+'" data-st="auto" onclick="ovClick(this)" title="Voltar ao automático">⟳ Auto</button>':'')
     +'</div>';
 
   return '<div class="sala-card-v2 '+info.stat+(info.override?' has-override':'')+'">'
     +'<div class="sc-header">'
-      +'<div class="sc-nome">'+esc(s.nome)+(info.override?'<span class="sc-ov-tag">⚙️</span>':'')+'</div>'
+      +'<div class="sc-nome">'+esc(s.nome)+(info.override?'<span class="sc-ov-tag"><i class="ph ph-gear"></i>️</span>':'')+'</div>'
       +'<div class="sc-status-dot '+info.stat+'"></div>'
     +'</div>'
     +'<div class="sc-tipo">'+esc(s.tipo)+'</div>'
     +'<div class="sc-meta">'
-      +'<div class="sc-meta-item" title="Andar"><span class="sc-meta-icon">🏢</span>'+esc(s.andar||'—')+'</div>'
-      +'<div class="sc-meta-item" title="Bloco"><span class="sc-meta-icon">📍</span>'+esc(s.bloco||'—')+'</div>'
-      +'<div class="sc-meta-item" title="Capacidade"><span class="sc-meta-icon">👥</span>'+s.capacidade+' pess.</div>'
+      +'<div class="sc-meta-item" title="Andar"><span class="sc-meta-icon"><i class="ph ph-buildings"></i></span>'+esc(s.andar||'—')+'</div>'
+      +'<div class="sc-meta-item" title="Bloco"><span class="sc-meta-icon"><i class="ph ph-map-pin"></i></span>'+esc(s.bloco||'—')+'</div>'
+      +'<div class="sc-meta-item" title="Capacidade"><span class="sc-meta-icon"><i class="ph ph-users"></i></span>'+s.capacidade+' pess.</div>'
     +'</div>'
     +'<div class="sc-turnos">'+turnosHtml+'</div>'
     +ocupHtml
@@ -517,9 +517,9 @@ function rdMapa() {
   var ocupadas=salasFiltradas.filter(function(s){return infoMap[s.id].stat==='ocupada';}).length;
   var iminentes=salasFiltradas.filter(function(s){return infoMap[s.id].stat==='iminente';}).length;
   var legEl=document.getElementById('mapaLegenda');
-  if(legEl) legEl.innerHTML='<span class="leg-item livre">🟢 Livre: '+livres+'</span>'
-    +'<span class="leg-item ocupada">🔴 Ocupada: '+ocupadas+'</span>'
-    +'<span class="leg-item iminente">🟡 Em breve: '+iminentes+'</span>'
+  if(legEl) legEl.innerHTML='<span class="leg-item livre"><span class="ic-dot ic-livre"></span> Livre: '+livres+'</span>'
+    +'<span class="leg-item ocupada"><span class="ic-dot ic-ocupada"></span> Ocupada: '+ocupadas+'</span>'
+    +'<span class="leg-item iminente"><span class="ic-dot ic-iminente"></span> Em breve: '+iminentes+'</span>'
     +'<span class="leg-total">Total: '+total+' sala(s)</span>';
 
   if(!salasFiltradas.length){
@@ -540,10 +540,10 @@ function rdMapa() {
   var html = '';
   Object.keys(grupos).sort().forEach(function(bloco){
     html += '<div class="mapa-bloco">';
-    html += '<div class="mapa-bloco-titulo">📍 '+esc(bloco)+'</div>';
+    html += '<div class="mapa-bloco-titulo"><i class="ph ph-map-pin"></i> '+esc(bloco)+'</div>';
     Object.keys(grupos[bloco]).sort().forEach(function(andar){
       html += '<div class="mapa-andar">';
-      html += '<div class="mapa-andar-titulo">🏢 '+esc(andar)+'</div>';
+      html += '<div class="mapa-andar-titulo"><i class="ph ph-buildings"></i> '+esc(andar)+'</div>';
       html += '<div class="mapa-andar-grid">';
       grupos[bloco][andar].forEach(function(s){
         html += _buildSalaCard(s, infoMap[s.id]);
@@ -625,8 +625,8 @@ function rdSolics() {
       +'<div class="ni-time">'+fmtDateTime(s.criadaEm)+'</div>'
       +(s.status==='pendente'
         ?'<div style="display:flex;gap:8px;margin-top:10px">'
-          +'<button class="btn btn-success btn-sm" onclick="responderSolic('+s.id+',\'aprovada\')">✓ Aprovar</button>'
-          +'<button class="btn btn-danger  btn-sm" onclick="responderSolic('+s.id+',\'recusada\')">✕ Recusar</button>'
+          +'<button class="btn btn-success btn-sm" onclick="responderSolic('+s.id+',\'aprovada\')"><i class="ph ph-check"></i> Aprovar</button>'
+          +'<button class="btn btn-danger  btn-sm" onclick="responderSolic('+s.id+',\'recusada\')"><i class="ph ph-x"></i> Recusar</button>'
           +'</div>'
         :'<div class="mt8"><span class="bdg '+(s.status==='aprovada'?'bdg-green':'bdg-red')+'">'+s.status.toUpperCase()+'</span></div>')
       +'</div>';
@@ -675,11 +675,8 @@ function responderSolic(id, status) {
     : 'Sua solicitação foi recusada.';
   addNotif({para:'instrutor',paraId:s?s.instrutorId:null,tipo:'info',titulo:'Solicitação '+status,msg:msg});
   toast('Solicitação '+status+'!','ok'); rdSolics(); _atualizarBadges();
-  // Refresh mapa if currently visible
-  var pgMapa = document.getElementById('pg-mapa');
-  if (pgMapa && (pgMapa.style.display==='block' || pgMapa.classList.contains('ativa'))) {
-    _popularFiltrosMapa(); rdMapa();
-  }
+  // Sempre atualiza o mapa para refletir a nova reserva imediatamente
+  _popularFiltrosMapa(); rdMapa();
 }
 
 /* NOTIFS */
