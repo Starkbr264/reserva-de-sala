@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coordenador — SENAC Reservas</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/search.css">
+
 </head>
 <body>
 <div class="layout">
@@ -39,7 +41,7 @@
   <div class="main">
     <header class="topbar">
       <div><div class="tb-title" id="tbTitle">Dashboard</div><div class="tb-sub" id="tbSub"></div></div>
-      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()">◐</button></div>
+      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()"><i class="ph ph-moon"></i></button></div>
     </header>
 
     <!-- DASHBOARD -->
@@ -127,12 +129,12 @@
             <div class="card-title">Mapa de Salas — Hoje</div>
             <div id="mapaLegenda" class="mapa-legenda"></div>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="rdMapa()">🔄 Atualizar</button>
+          <button class="btn btn-ghost btn-sm" onclick="rdMapa()"><i class="ph ph-arrows-clockwise"></i> Atualizar</button>
         </div>
         <!-- Filtros do mapa -->
         <div class="mapa-filtros">
           <div class="mapa-busca-wrap">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"><i class="ph ph-magnifying-glass"></i></span>
             <input type="text" id="mapaBusca" class="search-input" placeholder="Pesquisar sala…" oninput="rdMapa()">
           </div>
           <select id="mapaFiltBloco"  class="filter-select" onchange="rdMapa()" style="min-width:140px"><option value="">Todos os blocos</option></select>
@@ -143,12 +145,19 @@
           </select>
           <select id="mapaFiltStatus" class="filter-select" onchange="rdMapa()" style="min-width:130px">
             <option value="">Todos os status</option>
-            <option value="livre">🟢 Livre</option>
-            <option value="ocupada">🔴 Ocupada</option>
-            <option value="iminente">🟡 Em breve</option>
+            <option value="livre"><span class="ic-dot ic-livre"></span> Livre</option>
+            <option value="ocupada"><span class="ic-dot ic-ocupada"></span> Ocupada</option>
+            <option value="iminente"><span class="ic-dot ic-iminente"></span> Em breve</option>
           </select>
         </div>
         <div id="mapaSalas" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Próximas Reservas (14 dias)</div>
+        <div class="tw"><table class="tbl">
+          <thead><tr><th>Sala</th><th>Turma / Tipo</th><th>Instrutor</th><th>Período</th><th>Dias · Turno</th></tr></thead>
+          <tbody id="tbFuturasCoord"></tbody>
+        </table></div>
       </div>
     </div>
 
@@ -173,7 +182,7 @@
   <div class="modal-box" style="max-width:520px">
     <div class="modal-title">
       <span id="mSTit">Nova Sala</span>
-      <button class="modal-close" onclick="modalFechar('modalSala')" title="Fechar">✕</button>
+      <button class="modal-close" onclick="modalFechar('modalSala')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <div class="fg g2">
       <div class="ff"><label>Nome / Número *</label><input type="text" id="mSNome" placeholder="Ex.: Lab 03"></div>
@@ -198,7 +207,7 @@
   <div class="modal-box">
     <div class="modal-title">
       <span id="mTTit">Nova Turma</span>
-      <button class="modal-close" onclick="modalFechar('modalTurma')" title="Fechar">✕</button>
+      <button class="modal-close" onclick="modalFechar('modalTurma')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <div class="fg g2">
       <div class="ff"><label>Código *</label><input type="text" id="mTCod" placeholder="2025.08.178"></div>
@@ -222,7 +231,7 @@
   <div class="modal-box wide">
     <div class="modal-title">
       <span id="mrTitulo">Nova Reserva</span>
-      <button class="modal-close" onclick="modalFechar('modalRes')" title="Fechar">✕</button>
+      <button class="modal-close" onclick="modalFechar('modalRes')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <div class="fg g2">
       <div class="ff"><label>Sala *</label><select id="mRSala"></select></div>
@@ -235,7 +244,7 @@
     </div>
     <div id="mRMsg" class="fmsg"></div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="modalFechar('modalRes')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="_editReservaId=null;modalFechar('modalRes')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarReserva()">Criar Reserva</button>
     </div>
   </div>
@@ -246,7 +255,7 @@
   <div class="modal-box">
     <div class="modal-title">
       <span id="mATit">Atribuir Turma ao Instrutor</span>
-      <button class="modal-close" onclick="modalFechar('modalAtrib')" title="Fechar">✕</button>
+      <button class="modal-close" onclick="modalFechar('modalAtrib')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <input type="hidden" id="mAInstId">
     <div class="ff"><label>Turma</label><select id="mATurma"></select></div>

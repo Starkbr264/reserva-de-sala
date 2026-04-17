@@ -1,167 +1,241 @@
 # Caso de Uso — Sistema de Reserva de Salas SENAC-GDF
+**Versão:** 4 (CSS Modular + Mapa v2 + Andar/Bloco + Pesquisa Global)
+**Tecnologias:** HTML5 · CSS3 modular · JavaScript puro · localStorage
+
+---
 
 ## 1. Visão Geral do Sistema
 
-O **Sistema de Reserva de Salas SENAC-GDF** é uma aplicação web front-end (HTML + CSS + JavaScript puro) que gerencia a ocupação de salas nas 10 unidades do SENAC no Distrito Federal. Todo o armazenamento é feito via `localStorage` do navegador, sem necessidade de servidor ou banco de dados. A versão v2 inclui dados seed completos para todas as entidades, além de pesquisa e filtros em todas as telas.
+O **Sistema de Reserva de Salas SENAC-GDF** é uma aplicação web front-end que gerencia a ocupação de salas nas 10 unidades do SENAC no Distrito Federal. Não há servidor nem banco de dados — toda a persistência é feita via `localStorage` do navegador.
+
+### Principais características da versão atual
+
+- **Dados seed completos** carregados automaticamente no primeiro acesso (30 salas, 30 turmas, 30 reservas, 20 chaves, 40 usuários, 10 unidades)
+- **Pesquisa e filtros** em todas as telas de todas as telas (usuários, unidades, salas, turmas, reservas, chaves)
+- **Mapa de Salas v2** com cards ricos organizados por Bloco → Andar, com indicação de turno, status colorido e filtros em tempo real
+- **Campos Andar e Bloco** na criação e edição de salas
+- **CSS 100% modular**: 15 arquivos separados por responsabilidade, importados por um único `main.css`
 
 ---
 
 ## 2. Atores
 
-| Ator | Descrição |
-|---|---|
-| **Administrador** | Usuário fixo (`Senac_GDF@Hotmail.com` / `Senac.DF2007`). Gerencia usuários, unidades e tem visão global de salas, turmas, reservas e chaves de todas as unidades. |
-| **Coordenador** | Um por unidade. Cadastra salas, turmas, reservas e atribui instrutores. Senha padrão: `Coord@123`. |
-| **Instrutor** | Um por unidade. Visualiza suas turmas, solicita salas e controla retirada/devolução de chaves. Senha padrão: `Inst@123`. |
-| **Recepção** | Uma por unidade. Gerencia chaves (criação, controle de retirada) e visualiza o mapa de ocupação das salas. Senha padrão: `Recep@123`. |
+| Ator | Login de exemplo | Senha |
+|---|---|---|
+| **Administrador** | `Senac_GDF@Hotmail.com` | `Senac.DF2007` |
+| **Coordenador** (Asa Norte) | `coord.asanorte@senacdf.com` | `Coord@123` |
+| **Coordenador** (Taguatinga) | `coord.taguatinga@senacdf.com` | `Coord@123` |
+| **Instrutor** (Asa Norte) | `katia.barros@senacdf.com` | `Inst@123` |
+| **Instrutor** (Ceilândia) | `natan.ferreira@senacdf.com` | `Inst@123` |
+| **Recepção** (Asa Norte) | `recep.asanorte@senacdf.com` | `Recep@123` |
+
+> Todos os demais usuários seguem o mesmo padrão de e-mail e senha por perfil. Para resetar o sistema ao estado inicial, faça login como Administrador e clique em **⚠️ Resetar dados** na barra lateral.
 
 ---
 
-## 3. Dados Seed (pré-cadastrados no primeiro acesso)
+## 3. Dados Seed (carregados automaticamente no 1º acesso)
 
-O sistema carrega automaticamente os seguintes dados ao ser aberto pela primeira vez:
-
-- **10 Unidades**: Asa Norte, Asa Sul, Taguatinga, Ceilândia, Gama, Sobradinho, Planaltina, Samambaia, Santa Maria, Águas Claras — todas com endereço e CEP reais do DF.
-- **10 Coordenadores** (1 por unidade)
-- **10 Instrutores** (1 por unidade)
-- **10 Recepcionistas** (1 por unidade)
-- **30 Salas** (3 por unidade) — laboratórios de informática, gastronomia, estética, enfermagem, ciências, salas comuns, auditórios, salas de reunião e videoconferência.
-- **30 Turmas** (3 por unidade) — cursos técnicos e livres com datas relativas à data atual (ativas, iminentes e posteriores).
-- **30 Reservas** (1 por turma) — reservas recorrentes com dias da semana variados.
-- **20 Chaves** (2 por unidade) — metade disponível, metade já retirada por instrutores.
+| Entidade | Quantidade | Detalhes |
+|---|---|---|
+| Unidades | 10 | Asa Norte, Asa Sul, Taguatinga, Ceilândia, Gama, Sobradinho, Planaltina, Samambaia, Santa Maria, Águas Claras — com endereço e CEP reais do DF |
+| Usuários | 40 | 10 coordenadores + 10 instrutores + 10 recepcionistas (1 de cada por unidade) |
+| Salas | 30 | 3 por unidade, com **andar** e **bloco** definidos — labs de informática, gastronomia, estética, enfermagem, ciências, salas comuns, auditórios, videoconferência |
+| Turmas | 30 | 3 por unidade — cursos técnicos e livres com datas relativas ao dia atual (ativas, iminentes, posteriores) |
+| Reservas | 30 | 1 por turma, com dias da semana variados e períodos correspondentes às turmas |
+| Chaves | 20 | 2 por unidade — 10 disponíveis e 10 já retiradas por instrutores, com horário de retirada registrado |
 
 ---
 
-## 4. Casos de Uso por Ator
+## 4. Casos de Uso
 
 ### UC-01 — Login
-- **Atores**: Todos
-- **Fluxo**: O usuário acessa `index.html`, informa e-mail e senha e clica em "Entrar". O sistema valida as credenciais no `localStorage` (ou contra o admin fixo), registra a sessão e redireciona para a tela correspondente ao perfil.
-- **Fluxo alternativo**: Se as credenciais estiverem incorretas, exibe mensagem de erro sem redirecionar.
+**Atores:** Todos  
+**Fluxo principal:** o usuário acessa `index.html`, informa e-mail e senha e clica em "Entrar". O sistema valida as credenciais no `localStorage` (ou contra o admin fixo em memória), grava a sessão e redireciona para a tela do perfil correspondente.  
+**Fluxo alternativo:** credenciais inválidas exibem mensagem de erro sem redirecionar.  
+**Tela:** `index.html` / `login.html`
 
 ---
 
 ### UC-02 — Gerenciar Unidades *(Administrador)*
-- **Tela**: `admin.html` → aba Unidades / CPS
-- **Funcionalidades**: Criar, editar e excluir unidades (nome, endereço, CEP, cidade).
-- **Restrição**: Não é possível excluir uma unidade que tenha usuários vinculados.
-- **Pesquisa**: Campo de busca por nome, cidade ou CEP.
+**Tela:** `admin.html` → aba **Unidades / CPS**  
+**Funcionalidades:**
+- Criar, editar e excluir unidades (nome, endereço, CEP, cidade)
+- **Pesquisa em tempo real** por nome, cidade ou CEP
+
+**Restrição:** não é possível excluir uma unidade com usuários vinculados — o sistema exibe quantos usuários estão vinculados.
 
 ---
 
 ### UC-03 — Gerenciar Usuários *(Administrador)*
-- **Tela**: `admin.html` → aba Usuários
-- **Funcionalidades**: Criar, editar, redefinir senha e excluir usuários (coordenadores, instrutores, recepcionistas).
-- **Filtros disponíveis**:
-  - Filtrar por **perfil** (coordenador / instrutor / recepção)
-  - Filtrar por **unidade**
+**Tela:** `admin.html` → aba **Usuários**  
+**Funcionalidades:**
+- Criar, editar, redefinir senha e excluir usuários (coordenadores, instrutores, recepcionistas)
+- **Filtros disponíveis:**
   - Busca textual por nome ou e-mail
-- **Restrição**: E-mails devem ser únicos no sistema.
+  - Filtrar por perfil (coordenador / instrutor / recepção)
+  - Filtrar por unidade
+- Contador de resultados atualizado em tempo real
+
+**Restrição:** e-mails devem ser únicos. Novos usuários exigem senha definida no cadastro.
 
 ---
 
-### UC-04 — Visão Global *(Administrador)*
-- **Tela**: `admin.html` → abas Salas, Turmas, Reservas, Chaves
-- **Descrição**: O administrador pode visualizar e pesquisar todos os registros de todas as unidades em uma única tela, sem capacidade de edição (somente leitura).
-- **Filtros por aba**:
-  - **Salas**: busca textual, filtro por unidade e por tipo de sala
-  - **Turmas**: busca textual, filtro por unidade, turno e status (ativa/iminente/posterior/encerrada)
-  - **Reservas**: busca textual, filtro por unidade, turno e status
-  - **Chaves**: busca textual, filtro por unidade e status (disponível/retirada)
+### UC-04 — Visão Global do Sistema *(Administrador)*
+**Tela:** `admin.html` → abas **Salas**, **Turmas**, **Reservas**, **Chaves**  
+**Descrição:** o administrador visualiza e pesquisa registros de **todas as unidades** em uma única tela. Modo somente leitura (sem edição).
+
+**Filtros por aba:**
+
+| Aba | Busca textual | Filtros de seleção |
+|---|---|---|
+| Salas | Nome, tipo | Unidade, Tipo de sala |
+| Turmas | Código, curso | Unidade, Turno, Status |
+| Reservas | Sala, turma, turno | Unidade, Turno, Status |
+| Chaves | Código, sala, andar | Unidade, Status (disponível/retirada) |
 
 ---
 
 ### UC-05 — Gerenciar Salas *(Coordenador)*
-- **Tela**: `coordenador.html` → aba Salas
-- **Funcionalidades**: Criar, editar e excluir salas da própria unidade.
-- **Dados da sala**: nome/número, capacidade, tipo, turnos disponíveis (Matutino / Vespertino / Noturno — múltipla escolha).
-- **Pesquisa e filtros**: busca por nome ou tipo, filtro por tipo de sala.
-- **Restrição**: Não é possível excluir sala com reservas ativas vinculadas.
+**Tela:** `coordenador.html` → aba **Salas**  
+**Funcionalidades:** criar, editar e excluir salas da própria unidade.
+
+**Campos da sala:**
+- Nome / Número (ex: "Lab 03")
+- Capacidade (número de pessoas)
+- Tipo (texto livre — ex: Laboratório de Informática, Sala comum, Auditório…)
+- **Andar** *(novo)* — ex: Térreo, 1º Andar, 2º Andar
+- **Bloco** *(novo)* — ex: Bloco A, Bloco B, Principal
+- Turnos disponíveis (Matutino / Vespertino / Noturno — múltipla escolha via chips)
+
+**Pesquisa e filtros:** busca por nome/tipo/andar/bloco; filtro por tipo de sala.  
+**Tabela:** exibe colunas Nome, Andar, Bloco, Capacidade, Tipo, Turnos.  
+**Restrição:** não é possível excluir sala com reservas ativas vinculadas.
 
 ---
 
 ### UC-06 — Gerenciar Turmas *(Coordenador)*
-- **Tela**: `coordenador.html` → aba Turmas
-- **Funcionalidades**: Criar, editar e excluir turmas.
-- **Dados da turma**: código, curso, turno, data de início, data de fim, instrutor responsável.
-- **Status calculado automaticamente**: Ativa (já iniciou e não encerrou), Iminente (inicia em até 30 dias), Posterior (início distante) ou Encerrada (data fim no passado).
-- **Pesquisa e filtros**: busca por código/curso/instrutor, filtro por turno e status.
-- **Restrição**: Ao excluir, as reservas vinculadas também são removidas.
+**Tela:** `coordenador.html` → aba **Turmas**  
+**Funcionalidades:** criar, editar e excluir turmas da própria unidade.
+
+**Campos da turma:** código, curso, turno, data de início, data de fim, instrutor responsável (selecionado entre os instrutores da unidade).
+
+**Status calculado automaticamente:**
+- **Ativa** — já iniciou e ainda não encerrou
+- **Iminente** — início em até 30 dias
+- **Posterior** — início distante
+- **Encerrada** — data de fim no passado
+
+**Pesquisa e filtros:** busca por código/curso/instrutor; filtro por turno e status.  
+**Restrição:** ao excluir uma turma, todas as reservas vinculadas são removidas automaticamente.
 
 ---
 
 ### UC-07 — Criar Reserva Recorrente *(Coordenador)*
-- **Tela**: `coordenador.html` → aba Reservas
-- **Descrição**: Vincula uma sala a uma turma para dias da semana recorrentes dentro de um período definido.
-- **Dados da reserva**: sala, turma, turno, dias da semana (seg/ter/qua/qui/sex/sáb — múltipla escolha), data de início e data de fim (não pode ultrapassar a data fim da turma).
-- **Validações**:
-  - O turno da reserva deve estar disponível na sala selecionada.
-  - A data fim não pode ultrapassar a data fim da turma.
-  - O sistema detecta **conflitos** de reserva: mesma sala, mesmo turno, dias sobrepostos e períodos que se cruzam.
-- **Pesquisa e filtros**: busca por sala/turma, filtro por turno.
+**Tela:** `coordenador.html` → aba **Reservas**  
+**Descrição:** vincula uma sala a uma turma para dias da semana recorrentes dentro de um período.
+
+**Dados da reserva:** sala, turma, turno, dias da semana (seg/ter/qua/qui/sex/sáb — múltipla escolha), data de início e data de fim.
+
+**Validações:**
+1. O turno da reserva deve estar disponível na sala selecionada
+2. A data fim não pode ultrapassar a data fim da turma
+3. O sistema detecta **conflitos automáticos**: mesma sala + mesmo turno + dias sobrepostos + períodos que se cruzam → exibe mensagem indicando qual turma conflita e em quais dias
+
+**Pesquisa e filtros:** busca por sala/turma; filtro por turno.
 
 ---
 
 ### UC-08 — Atribuir Instrutor a Turma *(Coordenador)*
-- **Tela**: `coordenador.html` → aba Instrutores
-- **Descrição**: O coordenador seleciona um instrutor da sua unidade e atribui uma turma a ele.
-- **Pesquisa**: busca de instrutor por nome ou e-mail.
+**Tela:** `coordenador.html` → aba **Instrutores**  
+**Descrição:** o coordenador seleciona um instrutor da sua unidade e atribui uma turma a ele. A turma passa a aparecer no painel do instrutor.
+
+**Pesquisa:** busca de instrutor por nome ou e-mail.
 
 ---
 
-### UC-09 — Mapa de Ocupação *(Coordenador e Recepção)*
-- **Telas**: `coordenador.html` e `recepcao.html` → aba Mapa de Salas
-- **Descrição**: Exibe visualmente todas as salas da unidade com status colorido em tempo real:
-  - 🟢 **Livre** — sem reserva ativa no dia atual para o dia da semana atual
-  - 🔴 **Ocupada** — turma ativa reservada para hoje
-  - 🟡 **Em breve** — turma iminente reservada para hoje
-- Inclui tabela com reservas dos próximos 14 dias.
+### UC-09 — Mapa de Salas *(Coordenador e Recepção)*
+**Telas:** `coordenador.html` e `recepcao.html` → aba **Mapa de Salas**
+
+**Descrição:** exibe visualmente todas as salas da unidade organizadas hierarquicamente por **Bloco → Andar**, com cards ricos mostrando:
+
+| Elemento do card | O que exibe |
+|---|---|
+| Nome + dot colorido | Identificação e status visual imediato |
+| Tipo de sala | Ex: Laboratório de Informática |
+| 🏢 Andar | Ex: 1º Andar |
+| 📍 Bloco | Ex: Bloco A |
+| 👥 Capacidade | Número de pessoas |
+| Badges M / V / N | Turnos disponíveis — o turno em uso fica destacado em azul |
+| Turma + Instrutor + Turno | Quando ocupada ou iminente |
+| "🟢 Disponível" | Quando livre |
+
+**Status dos cards:**
+- 🟢 **Verde** — livre no dia/turno atual
+- 🔴 **Vermelho** — turma ativa reservada para hoje
+- 🟡 **Amarelo** — turma iminente reservada para hoje
+
+**Filtros do mapa (em tempo real):**
+- Busca por nome ou tipo de sala
+- Filtrar por Bloco
+- Filtrar por Andar
+- Filtrar por Turno disponível
+- Filtrar por Status (livre / ocupada / em breve)
+
+**Legenda dinâmica:** mostra contadores atualizados de salas livres, ocupadas e em breve + total filtrado.
+
+A recepção também vê a **tabela de próximas reservas** (próximos 14 dias) com sala, andar, bloco, turma, instrutor, período e dias.
 
 ---
 
 ### UC-10 — Gerenciar Chaves *(Recepção)*
-- **Tela**: `recepcao.html` → aba Chaves
-- **Descrição**: A recepção cadastra as chaves físicas de cada sala (código, andar) e controla quem as retirou.
-- **Funcionalidades**: criar, editar, excluir chaves; registrar retirada (vincula instrutor + horário) e devolução.
-- **Pesquisa e filtros**: busca por código/sala/andar/nome do instrutor, filtro por status (disponível/retirada).
+**Tela:** `recepcao.html` → aba **Chaves**  
+**Descrição:** a recepção cadastra as chaves físicas de cada sala e controla quem as retirou.
+
+**Campos da chave:** código (ex: "CH-001"), sala vinculada, andar.  
+**Ações:** criar, editar, excluir; registrar retirada (vincula instrutor + horário automático); registrar devolução.
+
+**Pesquisa e filtros:** busca por código/sala/andar/nome do instrutor; filtro por status (disponível / retirada).  
+**Visualização:** cards com ícone 🗝️ (disponível) ou 🔑 (retirada), nome da sala, código, andar, instrutor e horário de retirada.
 
 ---
 
-### UC-11 — Retirar/Devolver Chave *(Instrutor)*
-- **Tela**: `instrutor.html` → aba Chaves
-- **Descrição**: O instrutor sinaliza que retirou ou devolveu uma chave. O sistema registra o horário e notifica a recepção.
+### UC-11 — Retirar / Devolver Chave *(Instrutor)*
+**Tela:** `instrutor.html` → aba **Chaves**  
+**Descrição:** o instrutor sinaliza retirada ou devolução de uma chave. O sistema registra o horário e envia notificação à recepção.
 
 ---
 
 ### UC-12 — Solicitar Sala *(Instrutor)*
-- **Tela**: `instrutor.html` → aba Solicitar Sala
-- **Descrição**: O instrutor visualiza as salas disponíveis na unidade e envia uma solicitação de uso avulso ao coordenador (data, turno e motivo).
-- **Fluxo**: a solicitação fica pendente até o coordenador aprovar ou recusar, e o instrutor recebe notificação do resultado.
+**Tela:** `instrutor.html` → aba **Solicitar Sala**  
+**Descrição:** o instrutor visualiza as salas disponíveis na unidade (com status colorido) e envia uma solicitação de uso avulso ao coordenador informando data, turno e motivo.
+
+**Fluxo:** solicitação criada com status "pendente" → coordenador aprova ou recusa → instrutor recebe notificação do resultado.
 
 ---
 
 ### UC-13 — Visualizar Minhas Turmas *(Instrutor)*
-- **Tela**: `instrutor.html` → aba Minhas Turmas
-- **Descrição**: O instrutor visualiza todas as turmas atribuídas a ele, com sala reservada, status e período.
-- **Pesquisa e filtros**: busca por código/curso, filtro por status.
+**Tela:** `instrutor.html` → aba **Minhas Turmas**  
+**Descrição:** o instrutor vê todas as turmas atribuídas a ele com sala reservada, status e período.
+
+**Pesquisa e filtros:** busca por código/curso; filtro por status (ativa / iminente / posterior / encerrada).
 
 ---
 
 ### UC-14 — Responder Solicitações *(Coordenador)*
-- **Tela**: `coordenador.html` → aba Solicitações
-- **Descrição**: O coordenador visualiza as solicitações de sala pendentes de instrutores e as aprova ou recusa. O instrutor recebe notificação automática.
+**Tela:** `coordenador.html` → aba **Solicitações**  
+**Descrição:** o coordenador visualiza as solicitações de sala pendentes de instrutores e as aprova ou recusa com um clique. O instrutor recebe notificação automática com o resultado.
 
 ---
 
 ### UC-15 — Verificar Disponibilidade *(Coordenador)*
-- **Tela**: `dashboard.html` → seção Disponibilidade (painel antigo) ou `coordenador.html` → Mapa
-- **Descrição**: Permite selecionar uma sala, turno e data para verificar se há conflito com reservas existentes.
+**Tela:** `coordenador.html` → aba **Mapa de Salas** (filtro por status "Livre") ou `dashboard.html` → seção Disponibilidade  
+**Descrição:** permite identificar salas livres para um turno e período específicos, seja pelo mapa visual com filtros ou pela ferramenta de verificação de disponibilidade do painel antigo.
 
 ---
 
-## 5. Funcionalidade de Pesquisa e Filtros — Resumo Geral
+## 5. Pesquisa e Filtros — Resumo Completo
 
-| Tela / Aba | Busca Textual | Filtros Disponíveis |
+| Tela / Aba | Busca textual | Filtros de seleção |
 |---|---|---|
 | Admin → Usuários | Nome, e-mail | Perfil, Unidade |
 | Admin → Unidades | Nome, cidade, CEP | — |
@@ -169,17 +243,19 @@ O sistema carrega automaticamente os seguintes dados ao ser aberto pela primeira
 | Admin → Turmas | Código, curso | Unidade, Turno, Status |
 | Admin → Reservas | Sala, turma, turno | Unidade, Turno, Status |
 | Admin → Chaves | Código, sala, andar | Unidade, Status |
-| Coordenador → Salas | Nome, tipo | Tipo de sala |
+| Coordenador → Salas | Nome, tipo, andar, bloco | Tipo de sala |
 | Coordenador → Turmas | Código, curso, instrutor | Turno, Status |
 | Coordenador → Reservas | Sala, turma | Turno |
 | Coordenador → Instrutores | Nome, e-mail | — |
+| Coordenador → Mapa | Nome, tipo | Bloco, Andar, Turno, Status |
+| Recepção → Mapa | Nome, tipo | Bloco, Andar, Turno, Status |
 | Recepção → Chaves | Código, sala, andar | Status |
 | Instrutor → Turmas | Código, curso | Status |
 | Dashboard → Salas | Nome, tipo | Tipo, Turno disponível |
 | Dashboard → Turmas | Código, curso | Turno, Status |
 | Dashboard → Reservas | Sala, turma, turno | Turno, Status |
 
-Todas as barras incluem botão "Limpar filtros" e contador de resultados em tempo real.
+Todas as barras incluem **botão "Limpar filtros"** e **contador de resultados em tempo real**.
 
 ---
 
@@ -187,55 +263,112 @@ Todas as barras incluem botão "Limpar filtros" e contador de resultados em temp
 
 ```
 Reserva_de_salas_v2/
-├── index.html          — Tela de login (roteamento por perfil)
-├── admin.html          — Painel do administrador
-├── coordenador.html    — Painel do coordenador
-├── recepcao.html       — Painel da recepção
-├── instrutor.html      — Painel do instrutor
-├── dashboard.html      — Painel antigo (salas/turmas/reservas/disponibilidade)
-├── login.html          — Alias de login
+├── index.html            — Tela de login (roteamento por perfil)
+├── login.html            — Alias de login
+├── admin.html            — Painel do administrador
+├── coordenador.html      — Painel do coordenador
+├── recepcao.html         — Painel da recepção
+├── instrutor.html        — Painel do instrutor
+├── dashboard.html        — Painel antigo (salas/turmas/reservas/disponibilidade)
+│
 ├── css/
-│   ├── style.css       — Estilos principais
-│   ├── index.css       — Estilos da tela de login
-│   └── search.css      — Estilos das barras de pesquisa e filtros (novo)
+│   ├── main.css          ← ÚNICO arquivo referenciado nos HTMLs
+│   │                        Importa todos os módulos abaixo em ordem
+│   ├── variables.css     — Tokens de design: cores, sombras, tipografia, temas claro/escuro
+│   ├── reset.css         — Normalização base, utilitários globais, animações
+│   ├── login.css         — Tela de login: caixa, logo, campos, botão
+│   ├── layout.css        — Sidebar, topbar, estrutura de página, tema escuro
+│   ├── components.css    — Cards, stats, badges, chips, status de turma
+│   ├── forms.css         — Inputs, selects, textareas, mensagens de feedback
+│   ├── buttons.css       — Todos os estilos de botão
+│   ├── table.css         — Tabelas de dados (.tbl, .tw, .empty-row)
+│   ├── modal.css         — Overlays e caixas de diálogo
+│   ├── toast.css         — Pop-ups de feedback breve (#toasts)
+│   ├── notifications.css — Itens de notificação e solicitação
+│   ├── keys.css          — Cards de chaves físicas
+│   ├── map.css           — Mapa de salas v2 (bloco/andar/cards ricos)
+│   ├── search.css        — Barras de pesquisa e filtros globais
+│   └── dashboard.css     — Classes exclusivas do dashboard.html
+│
 ├── js/
-│   ├── storage.js      — Camada de dados + seed completo (novo)
-│   ├── auth.js         — Autenticação e controle de sessão
-│   ├── search.js       — Motor de pesquisa e gerador de filtros (novo)
-│   ├── admin_page.js   — Lógica do painel admin (com busca)
-│   ├── coordenador_page.js — Lógica do painel coordenador (com busca)
-│   ├── recepcao_page.js    — Lógica do painel recepção (com busca)
-│   ├── instrutor_page.js   — Lógica do painel instrutor (com busca)
-│   ├── dashboard_page.js   — Inicialização do dashboard antigo
-│   ├── salas.js        — CRUD de salas + busca (dashboard)
-│   ├── turmas.js       — CRUD de turmas + busca (dashboard)
-│   ├── reservas.js     — CRUD de reservas + busca + conflito
-│   └── disponibilidade.js  — Verificação de disponibilidade
+│   ├── storage.js        — Camada de dados + seed completo (v4)
+│   ├── auth.js           — Autenticação e controle de sessão
+│   ├── search.js         — Motor de pesquisa e gerador de filtros
+│   ├── admin_page.js     — Lógica do painel admin (com busca e 7 abas)
+│   ├── coordenador_page.js — Lógica do painel coordenador (com busca + mapa v2)
+│   ├── recepcao_page.js  — Lógica do painel recepção (com busca + mapa v2)
+│   ├── instrutor_page.js — Lógica do painel instrutor (com busca)
+│   ├── dashboard_page.js — Inicialização do dashboard antigo
+│   ├── salas.js          — CRUD de salas + busca (dashboard)
+│   ├── turmas.js         — CRUD de turmas + busca (dashboard)
+│   ├── reservas.js       — CRUD de reservas + busca + detecção de conflito
+│   └── disponibilidade.js — Verificação de disponibilidade
+│
 └── img/
     └── senac-logo-sem-fundo.webp
 ```
 
 ---
 
-## 7. Fluxo Completo de Uso Típico
+## 7. Arquitetura CSS Modular
 
-1. **Admin** faz login → verifica o dashboard com os contadores → pode pesquisar qualquer usuário/sala/turma/chave por nome em segundos.
-2. **Coordenador** (ex: Ana Paula da Asa Norte) faz login → vê o dashboard da unidade → cadastra uma nova sala → cria uma turma → cria a reserva recorrente (o sistema bloqueia conflitos automaticamente) → atribui um instrutor.
-3. **Recepção** (ex: Úrsula da Asa Norte) faz login → vê o mapa colorido das salas → cria uma chave nova para o Lab 01 → registra que o instrutor Katia retirou a chave.
-4. **Instrutor** (ex: Katia) faz login → vê suas turmas filtradas por "ativas" → confirma a retirada da chave → solicita uma sala avulsa para um dia específico.
-5. **Coordenador** recebe notificação da solicitação → aprova → instrutor recebe notificação de aprovação.
+Todos os HTMLs referenciam **apenas `css/main.css`**, que usa `@import` para carregar os módulos na ordem correta:
+
+```
+HTML → main.css → variables.css
+                → reset.css
+                → login.css
+                → layout.css
+                → components.css
+                → forms.css
+                → buttons.css
+                → table.css
+                → modal.css
+                → toast.css
+                → notifications.css
+                → keys.css
+                → map.css
+                → search.css
+                → dashboard.css
+```
+
+**Vantagens:** para modificar o visual de qualquer parte do sistema, basta editar o arquivo correspondente — sem risco de afetar outros componentes. As variáveis de `variables.css` propagam automaticamente para todos os módulos, incluindo o tema escuro.
 
 ---
 
-## 8. Logins de Teste
+## 8. Fluxo Completo de Uso Típico
+
+**Cenário:** primeiro dia de aula de uma nova turma na unidade Asa Norte.
+
+1. **Admin** (`Senac_GDF@Hotmail.com`) faz login → vê no dashboard 30 salas, 30 turmas, 30 reservas → pesquisa "Asa Norte" na aba Salas para confirmar as salas cadastradas.
+
+2. **Coordenadora** Ana Paula (`coord.asanorte@senacdf.com`) faz login → vai em **Salas** → cadastra nova sala "Lab 04" com Andar "2º Andar", Bloco "Bloco C", tipo "Laboratório de Informática", turnos Matutino e Noturno.
+
+3. Ana Paula vai em **Turmas** → cria turma "2025.04.104", curso "Técnico em Redes", turno Matutino, atribui a instrutora Katia Barros.
+
+4. Ana Paula vai em **Reservas** → seleciona Lab 04 + turma 2025.04.104 → marca seg/ter/qua/qui/sex → o sistema valida o turno e confirma ausência de conflito → reserva criada.
+
+5. Ana Paula vai em **Mapa de Salas** → filtra por "Bloco C" → vê Lab 04 no card verde (🟢 Livre), com badges M e N nos turnos disponíveis.
+
+6. **Recepcionista** Úrsula (`recep.asanorte@senacdf.com`) faz login → vê o mapa → Lab 04 ainda livre (aula começa amanhã) → cadastra a chave "CH-021" para Lab 04, andar "2º Andar".
+
+7. **Instrutora** Katia (`katia.barros@senacdf.com`) faz login → vai em **Minhas Turmas** → vê a turma 2025.04.104 com Lab 04 reservado e status Iminente → vai em **Chaves** → sinaliza retirada da CH-021.
+
+8. Úrsula recebe notificação → vê no mapa da recepção que Lab 04 está agora com status 🟡 (em breve, turma começa amanhã).
+
+9. No dia seguinte, o mapa atualiza automaticamente: Lab 04 aparece 🔴 (ocupada) durante o turno Matutino, com nome da turma e da instrutora no card.
+
+---
+
+## 9. Logins de Teste Rápido
 
 | Perfil | E-mail | Senha |
 |---|---|---|
 | Administrador | Senac_GDF@Hotmail.com | Senac.DF2007 |
-| Coordenador (Asa Norte) | coord.asanorte@senacdf.com | Coord@123 |
-| Instrutor (Asa Norte) | katia.barros@senacdf.com | Inst@123 |
-| Recepção (Asa Norte) | recep.asanorte@senacdf.com | Recep@123 |
-| Coordenador (Taguatinga) | coord.taguatinga@senacdf.com | Coord@123 |
-| Instrutor (Ceilândia) | natan.ferreira@senacdf.com | Inst@123 |
-
-> Para resetar todos os dados ao estado inicial, faça login como Administrador e clique em "⚠️ Resetar dados" na barra lateral.
+| Coord. Asa Norte | coord.asanorte@senacdf.com | Coord@123 |
+| Coord. Taguatinga | coord.taguatinga@senacdf.com | Coord@123 |
+| Coord. Ceilândia | coord.ceilandia@senacdf.com | Coord@123 |
+| Instrutor Asa Norte | katia.barros@senacdf.com | Inst@123 |
+| Instrutor Gama | olivia.martins@senacdf.com | Inst@123 |
+| Recepção Asa Norte | recep.asanorte@senacdf.com | Recep@123 |
+| Recepção Águas Claras | recep.aguasclaras@senacdf.com | Recep@123 |

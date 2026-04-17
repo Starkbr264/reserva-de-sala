@@ -107,7 +107,7 @@ function rdChavesR() {
     const pega=c.status==='pega';
     const inst=pega&&c.instrutorId?getUserById(c.instrutorId):null;
     return `<div class="chave-card ${c.status}">
-      <div class="chave-icon">${pega?'🔑':'🗝️'}</div>
+      <div class="chave-icon">${pega?'<i class="ph ph-key"></i>':'<i class="ph ph-key"></i>️'}</div>
       <div class="chave-info">
         <div class="chave-titulo">${esc(sala?sala.nome:'Sala')} — ${esc(c.codigo||'Chave')}</div>
         <div class="chave-det">Andar ${esc(c.andar||'—')} · <strong>${pega?'Retirada':'Disponível'}</strong></div>

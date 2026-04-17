@@ -325,9 +325,10 @@ function _renderTbResAdmin(){
   var tb=document.getElementById('tbResAdmin');
   if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="6">Nenhuma reserva encontrada.</td></tr>';return;}
   tb.innerHTML=list.map(function(r){
-    var sala=getSalaById(r.salaId); var turma=getTurmaById(r.turmaId); var unid=getUnidadeById(r.unidadeId);
+    var sala=getSalaById(r.salaId); var turma=r.turmaId?getTurmaById(r.turmaId):null; var unid=getUnidadeById(r.unidadeId);
+    var turmaLabel = r.avulsa ? '<span class="bdg bdg-amber">Avulsa</span>' : esc(turma?turma.nome:'—');
     return '<tr><td><strong>'+esc(sala?sala.nome:'—')+'</strong></td>'
-      +'<td class="mono">'+esc(turma?turma.nome:'—')+'</td>'
+      +'<td class="mono">'+turmaLabel+'</td>'
       +'<td>'+esc(unid?unid.nome:'—')+'</td>'
       +'<td><span class="bdg bdg-primary">'+esc(r.turno)+'</span></td>'
       +'<td style="font-size:.82rem">'+fmtData(r.dataInicio)+' → '+fmtData(r.dataFim)+'</td>'
@@ -375,7 +376,7 @@ function _renderTbChavAdmin(){
 
 /* ── RESET ── */
 function resetarTodosDados(){
-  if(!confirm('⚠️ Isso vai apagar TODOS os dados e restaurar o padrão.\n\nTem certeza?'))return;
+  if(!confirm('<i class="ph ph-warning"></i>️ Isso vai apagar TODOS os dados e restaurar o padrão.\n\nTem certeza?'))return;
   if(!confirm('Confirme: apagar TUDO e voltar ao estado inicial?'))return;
   localStorage.clear(); toast('Dados resetados! Recarregando…','aviso');
   setTimeout(function(){window.location.reload();},800);

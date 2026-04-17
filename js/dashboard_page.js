@@ -84,15 +84,11 @@ window.addEventListener('DOMContentLoaded', function() {
   /* ============================================================
      Inicialização da aplicação
      ============================================================ */
-  window.addEventListener('DOMContentLoaded', function() {
-    requireAuth();
-
-    initSalas();
-    initTurmas();
-    initReservas();
-    initDisponibilidade();
-    initLogo();
-
-    mostrarSecao('salas');
-  });
+  initDados();
+  initSalas();
+  initTurmas();
+  initReservas();
+  initDisponibilidade();
+  initLogo();
+  mostrarSecao('salas');
 });

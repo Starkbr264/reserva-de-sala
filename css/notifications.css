@@ -1,0 +1,20 @@
+/* ================================================================
+   notifications.css — Itens de notificação e solicitação
+   ================================================================ */
+.notif-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid;
+  border-radius: var(--r);
+  padding: 13px 16px;
+  margin-bottom: 8px;
+}
+.notif-item.nao-lida       { background: var(--primary-l); }
+.notif-item.tipo-solicit   { border-left-color: var(--primary); }
+.notif-item.tipo-chave     { border-left-color: var(--green);   }
+.notif-item.tipo-aviso     { border-left-color: var(--amber);   }
+.notif-item.tipo-info      { border-left-color: var(--blue);    }
+
+.ni-title { font-weight: 600; font-size: .9rem;  color: var(--text);  }
+.ni-msg   { font-size: .82rem;                   color: var(--text2); margin-top: 3px; }
+.ni-time  { font-size: .72rem;                   color: var(--text3); margin-top: 5px; }

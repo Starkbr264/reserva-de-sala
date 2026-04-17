@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recepção — SENAC Reservas</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/search.css">
+
 </head>
 <body>
 <div class="layout">
@@ -32,7 +34,7 @@
   <div class="main">
     <header class="topbar">
       <div><div class="tb-title" id="tbTitle">Mapa de Salas</div><div class="tb-sub" id="tbSub"></div></div>
-      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()">◐</button></div>
+      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()"><i class="ph ph-moon"></i></button></div>
     </header>
 
     <!-- MAPA -->
@@ -43,12 +45,12 @@
             <div class="card-title">Ocupação das Salas — Hoje</div>
             <div id="mapaRecLegenda" class="mapa-legenda"></div>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="rdMapa()">🔄 Atualizar</button>
+          <button class="btn btn-ghost btn-sm" onclick="rdMapa()"><i class="ph ph-arrows-clockwise"></i> Atualizar</button>
         </div>
         <!-- Filtros -->
         <div class="mapa-filtros">
           <div class="mapa-busca-wrap">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"><i class="ph ph-magnifying-glass"></i></span>
             <input type="text" id="mapaRecBusca" class="search-input" placeholder="Pesquisar sala…" oninput="rdMapa()">
           </div>
           <select id="mapaRecFiltBloco"  class="filter-select" onchange="rdMapa()" style="min-width:140px"><option value="">Todos os blocos</option></select>
@@ -59,9 +61,9 @@
           </select>
           <select id="mapaRecFiltStatus" class="filter-select" onchange="rdMapa()" style="min-width:130px">
             <option value="">Todos os status</option>
-            <option value="livre">🟢 Livre</option>
-            <option value="ocupada">🔴 Ocupada</option>
-            <option value="iminente">🟡 Em breve</option>
+            <option value="livre"><span class="ic-dot ic-livre"></span> Livre</option>
+            <option value="ocupada"><span class="ic-dot ic-ocupada"></span> Ocupada</option>
+            <option value="iminente"><span class="ic-dot ic-iminente"></span> Em breve</option>
           </select>
         </div>
         <div id="mapaRec" style="margin-top:8px"></div>
@@ -102,7 +104,7 @@
   <div class="modal-box">
     <div class="modal-title">
       <span id="mCTit">Nova Chave</span>
-      <button class="modal-close" onclick="modalFechar('modalChave')" title="Fechar">✕</button>
+      <button class="modal-close" onclick="modalFechar('modalChave')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <input type="hidden" id="mCId">
     <div class="fg">

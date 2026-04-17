@@ -44,9 +44,9 @@ function aplicarFiltros(lista, filtros) {
  * @param {string} inputId  - id do <input>
  */
 function htmlBarraBusca(placeholder, inputId) {
-  return '<div class="search-bar"><span class="search-icon">🔍</span>'
+  return '<div class="search-bar"><span class="search-icon"><i class="ph ph-magnifying-glass"></i></span>'
     + '<input type="text" id="' + inputId + '" class="search-input" placeholder="' + esc(placeholder) + '" autocomplete="off">'
-    + '<button class="search-clear" onclick="document.getElementById(\'' + inputId + '\').value=\'\';document.getElementById(\'' + inputId + '\').dispatchEvent(new Event(\'input\'));" title="Limpar">✕</button>'
+    + '<button class="search-clear" onclick="document.getElementById(\'' + inputId + '\').value=\'\';document.getElementById(\'' + inputId + '\').dispatchEvent(new Event(\'input\'));" title="Limpar"><i class="ph ph-x"></i></button>'
     + '</div>';
 }
 

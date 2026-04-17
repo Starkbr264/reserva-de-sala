@@ -20,50 +20,129 @@ function ir(aba) {
 }
 
 function _calcSalaStatusRec(s, hj) {
-  var stat='livre', turnoAtivo='', instNome='', turmaNome='';
-  var rs=getReservas().filter(function(r){return r.salaId===s.id&&r.dataInicio<=hj&&r.dataFim>=hj;});
-  for(var i=0;i<rs.length;i++){
-    var r=rs[i]; var t=getTurmaById(r.turmaId);
-    var cst=t?calcStatus(t):'encerrada'; if(cst==='encerrada')continue;
-    var p=hj.split('-').map(Number);
-    var dia=['dom','seg','ter','qua','qui','sex','sab'][new Date(p[0],p[1]-1,p[2]).getDay()];
-    if(r.diasSemana.includes(dia)){
-      stat=cst==='ativa'?'ocupada':'iminente';
-      turnoAtivo=r.turno; turmaNome=t?t.nome:'—';
-      var inst=t&&t.instrutorId?getUserById(t.instrutorId):null;
-      instNome=inst?inst.nome:''; break;
-    }
+  // Verificar override manual primeiro
+  var ov=getOverride(s.id, s.unidadeId);
+  if(ov){
+    return {
+      stat:ov.status, override:ov,
+      periodos:ov.status!=='livre'?[{turno:'Manual',turmaNome:ov.motivo||'Status manual',instNome:ov.por||'',stat:ov.status}]:[],
+      turnosOcupados:ov.status!=='livre'?['Manual']:[],
+      turnoAtivo:ov.status!=='livre'?'Manual':'', turmaNome:ov.motivo||'', instNome:ov.por||''
+    };
   }
-  return {stat:stat,turnoAtivo:turnoAtivo,instNome:instNome,turmaNome:turmaNome};
+  // Calcular pelo calendário
+  var rs=getReservas().filter(function(r){return r.salaId===s.id&&r.dataInicio<=hj&&r.dataFim>=hj;});
+  var p=hj.split('-').map(Number);
+  var dia=['dom','seg','ter','qua','qui','sex','sab'][new Date(p[0],p[1]-1,p[2]).getDay()];
+  var periodos=[], turnosOcupados=[];
+  rs.forEach(function(r){
+    if(!r.diasSemana.includes(dia)) return;
+    var pStat,pTurma,pInst;
+    if(r.avulsa||!r.turmaId){
+      pStat='ocupada'; pTurma='Reserva avulsa';
+      var iA=r.instrutorId?getUserById(r.instrutorId):null; pInst=iA?iA.nome:'—';
+    } else {
+      var t=getTurmaById(r.turmaId); var cst=t?calcStatus(t):'encerrada';
+      if(cst==='encerrada') return;
+      pStat=cst==='ativa'?'ocupada':'iminente'; pTurma=t?t.nome:'—';
+      var inst=t&&t.instrutorId?getUserById(t.instrutorId):null; pInst=inst?inst.nome:'';
+    }
+    periodos.push({turno:r.turno,turmaNome:pTurma,instNome:pInst,stat:pStat});
+    if(turnosOcupados.indexOf(r.turno)===-1) turnosOcupados.push(r.turno);
+  });
+  var stat='livre';
+  if(periodos.some(function(p){return p.stat==='ocupada';})) stat='ocupada';
+  else if(periodos.length>0) stat='iminente';
+  return {
+    stat:stat, periodos:periodos, turnosOcupados:turnosOcupados, override:null,
+    turnoAtivo:periodos.length?periodos[0].turno:'',
+    turmaNome:periodos.length?periodos[0].turmaNome:'',
+    instNome:periodos.length?periodos[0].instNome:''
+  };
 }
 
 function _buildSalaCardRec(s, info) {
-  var turnosHtml=(s.turnos||s.turnosDisponiveis||[]).map(function(t){
-    var cor=t===info.turnoAtivo?'mapa-turno ativo':'mapa-turno';
-    return '<span class="'+cor+'">'+t[0]+'</span>';
+  var statusIcon = {livre:'<span class="ic-dot ic-livre"></span>',ocupada:'<span class="ic-dot ic-ocupada"></span>',iminente:'<span class="ic-dot ic-iminente"></span>'}[info.stat]||'<span class="ic-dot ic-livre"></span>';
+  var turnos = s.turnos||s.turnosDisponiveis||[];
+  var uid = s.unidadeId||_uid();
+
+  var turnosHtml = turnos.map(function(t){
+    var per = info.periodos ? info.periodos.find(function(p){return p.turno===t;}) : null;
+    var cls = 'mapa-turno';
+    if (per) cls += per.stat==='ocupada' ? ' ocupado' : ' iminente-turno';
+    return '<span class="'+cls+'" title="'+(per?esc(per.turmaNome):'Livre')+'">'+t[0]+'</span>';
   }).join('');
-  return '<div class="sala-card-v2 '+info.stat+'">'
-    +'<div class="sc-header">'
-      +'<div class="sc-nome">'+esc(s.nome)+'</div>'
-      +'<div class="sc-status-dot '+info.stat+'"></div>'
-    +'</div>'
+
+  var ocupHtml = '';
+  if (info.periodos && info.periodos.length) {
+    ocupHtml = '<div class="sc-ocupacao">';
+    if (info.override) {
+      ocupHtml += '<div class="sc-periodo sc-override">'
+        +'<span class="sc-periodo-turno '+(info.stat==='ocupada'?'ocp':'imi')+'"><i class="ph ph-gear"></i>️ Manual</span>'
+        +'<div class="sc-turma">'+esc(info.override.motivo||'Status manual')+'</div>'
+        +'<div class="sc-inst">por '+esc(info.override.por)+'</div>'
+        +'</div>';
+    } else {
+      info.periodos.forEach(function(per){
+        var ic = per.stat==='ocupada'?'<span class="ic-dot ic-ocupada"></span>':'<span class="ic-dot ic-iminente"></span>';
+        ocupHtml += '<div class="sc-periodo">'
+          +'<span class="sc-periodo-turno '+(per.stat==='ocupada'?'ocp':'imi')+'">'+ic+' '+esc(per.turno)+'</span>'
+          +'<div class="sc-turma"><i class="ph ph-books"></i> '+esc(per.turmaNome)+'</div>'
+          +(per.instNome?'<div class="sc-inst"><i class="ph ph-user"></i> '+esc(per.instNome)+'</div>':'')
+          +'</div>';
+      });
+    }
+    ocupHtml += '</div>';
+  } else {
+    ocupHtml = '<div class="sc-livre-label">'+statusIcon+' Disponível</div>';
+  }
+
+  var sid = s.id;
+  var ovOcup  = info.stat==='ocupada'  ? 'ov-active' : '';
+  var ovIminn = info.stat==='iminente' ? 'ov-active' : '';
+  var ovLivre = (info.stat==='livre' && !info.override) ? 'ov-active' : '';
+  var ovBtn = '<div class="sc-override-bar">'
+    +'<button class="sc-ov-btn '+ovOcup+'"  data-sid="'+sid+'" data-uid="'+uid+'" data-st="ocupada"  onclick="ovClickRec(this)" title="Marcar Ocupada"><span class="ic-dot ic-ocupada"></span></button>'
+    +'<button class="sc-ov-btn '+ovIminn+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="iminente" onclick="ovClickRec(this)" title="Marcar Em Breve"><span class="ic-dot ic-iminente"></span></button>'
+    +'<button class="sc-ov-btn '+ovLivre+'" data-sid="'+sid+'" data-uid="'+uid+'" data-st="livre"    onclick="ovClickRec(this)" title="Marcar Livre"><span class="ic-dot ic-livre"></span></button>'
+    +(info.override?'<button class="sc-ov-btn sc-ov-auto" data-sid="'+sid+'" data-uid="'+uid+'" data-st="auto" onclick="ovClickRec(this)" title="Voltar ao automático">⟳ Auto</button>':'')
+    +'</div>';
+
+  return '<div class="sala-card-v2 '+info.stat+(info.override?' has-override':'')+'">'
+    +'<div class="sc-header"><div class="sc-nome">'+esc(s.nome)+(info.override?'<span class="sc-ov-tag"><i class="ph ph-gear"></i>️</span>':'')+'</div>'
+    +'<div class="sc-status-dot '+info.stat+'"></div></div>'
     +'<div class="sc-tipo">'+esc(s.tipo)+'</div>'
     +'<div class="sc-meta">'
-      +'<div class="sc-meta-item"><span class="sc-meta-icon">🏢</span>'+esc(s.andar||'—')+'</div>'
-      +'<div class="sc-meta-item"><span class="sc-meta-icon">📍</span>'+esc(s.bloco||'—')+'</div>'
-      +'<div class="sc-meta-item"><span class="sc-meta-icon">👥</span>'+s.capacidade+'</div>'
+      +'<div class="sc-meta-item"><span class="sc-meta-icon"><i class="ph ph-buildings"></i></span>'+esc(s.andar||'—')+'</div>'
+      +'<div class="sc-meta-item"><span class="sc-meta-icon"><i class="ph ph-map-pin"></i></span>'+esc(s.bloco||'—')+'</div>'
+      +'<div class="sc-meta-item"><span class="sc-meta-icon"><i class="ph ph-users"></i></span>'+s.capacidade+'</div>'
     +'</div>'
     +'<div class="sc-turnos">'+turnosHtml+'</div>'
-    +(info.stat!=='livre'
-      ?'<div class="sc-ocupacao">'
-        +'<div class="sc-turma">📚 '+esc(info.turmaNome)+'</div>'
-        +(info.instNome?'<div class="sc-inst">👤 '+esc(info.instNome)+'</div>':'')
-        +'<div class="sc-turno-ativo">⏰ '+esc(info.turnoAtivo)+'</div>'
-        +'</div>'
-      :'<div class="sc-livre-label">🟢 Disponível</div>'
-    )
+    +ocupHtml+ovBtn
     +'</div>';
 }
+
+function ovClickRec(btn) {
+  var salaId    = parseInt(btn.getAttribute('data-sid'));
+  var unidadeId = parseInt(btn.getAttribute('data-uid'));
+  var status    = btn.getAttribute('data-st');
+  _setOverrideRec(salaId, unidadeId, status);
+}
+
+function _setOverrideRec(salaId, unidadeId, status) {
+  var motivo = '';
+  if (status==='ocupada'||status==='iminente') {
+    motivo = prompt(
+      status==='ocupada' ? 'Motivo da ocupação:' : 'Motivo para "Em Breve":',
+      status==='ocupada' ? 'Em uso' : 'Preparação'
+    );
+    if (motivo===null) return;
+  }
+  var sess = getSessao();
+  setOverride(salaId, unidadeId, status==='auto' ? null : status, motivo, sess ? sess.nome : '—');
+  rdMapa();
+}
+
 
 function _popularFiltrosMapaRec() {
   var salas=getSalasByUnidade(_uid());
@@ -71,8 +150,14 @@ function _popularFiltrosMapaRec() {
   var andares=[...new Set(salas.map(function(s){return s.andar||'';}).filter(Boolean))].sort();
   var selB=document.getElementById('mapaRecFiltBloco');
   var selA=document.getElementById('mapaRecFiltAndar');
-  if(selB){ selB.innerHTML='<option value="">Todos os blocos</option>'+blocos.map(function(b){return'<option>'+esc(b)+'</option>';}).join(''); }
-  if(selA){ selA.innerHTML='<option value="">Todos os andares</option>'+andares.map(function(a){return'<option>'+esc(a)+'</option>';}).join(''); }
+  if(selB){
+    var curB=selB.value;
+    selB.innerHTML='<option value="">Todos os blocos</option>'+blocos.map(function(b){return'<option'+(b===curB?' selected':'')+'>'+esc(b)+'</option>';}).join('');
+  }
+  if(selA){
+    var curA=selA.value;
+    selA.innerHTML='<option value="">Todos os andares</option>'+andares.map(function(a){return'<option'+(a===curA?' selected':'')+'>'+esc(a)+'</option>';}).join('');
+  }
 }
 
 function rdMapa() {
@@ -102,9 +187,9 @@ function rdMapa() {
   var ocupadas=salasFiltradas.filter(function(s){return infoMap[s.id].stat==='ocupada';}).length;
   var iminentes=salasFiltradas.filter(function(s){return infoMap[s.id].stat==='iminente';}).length;
   var legEl=document.getElementById('mapaRecLegenda');
-  if(legEl) legEl.innerHTML='<span class="leg-item livre">🟢 Livre: '+livres+'</span>'
-    +'<span class="leg-item ocupada">🔴 Ocupada: '+ocupadas+'</span>'
-    +'<span class="leg-item iminente">🟡 Em breve: '+iminentes+'</span>'
+  if(legEl) legEl.innerHTML='<span class="leg-item livre"><span class="ic-dot ic-livre"></span> Livre: '+livres+'</span>'
+    +'<span class="leg-item ocupada"><span class="ic-dot ic-ocupada"></span> Ocupada: '+ocupadas+'</span>'
+    +'<span class="leg-item iminente"><span class="ic-dot ic-iminente"></span> Em breve: '+iminentes+'</span>'
     +'<span class="leg-total">Total: '+salasFiltradas.length+'</span>';
 
   if(!salasFiltradas.length){cont.innerHTML='<p class="txt2" style="padding:24px">Nenhuma sala com esses filtros.</p>';return;}
@@ -119,9 +204,9 @@ function rdMapa() {
 
   var html='';
   Object.keys(grupos).sort().forEach(function(bloco){
-    html+='<div class="mapa-bloco"><div class="mapa-bloco-titulo">📍 '+esc(bloco)+'</div>';
+    html+='<div class="mapa-bloco"><div class="mapa-bloco-titulo"><i class="ph ph-map-pin"></i> '+esc(bloco)+'</div>';
     Object.keys(grupos[bloco]).sort().forEach(function(andar){
-      html+='<div class="mapa-andar"><div class="mapa-andar-titulo">🏢 '+esc(andar)+'</div>';
+      html+='<div class="mapa-andar"><div class="mapa-andar-titulo"><i class="ph ph-buildings"></i> '+esc(andar)+'</div>';
       html+='<div class="mapa-andar-grid">';
       grupos[bloco][andar].forEach(function(s){ html+=_buildSalaCardRec(s,infoMap[s.id]); });
       html+='</div></div>';
@@ -152,7 +237,7 @@ function rdChaves() {
   cont.innerHTML=list.map(function(c){
     var sala=getSalaById(c.salaId); var pega=c.status==='pega'; var quem=pega&&c.instrutorId?getUserById(c.instrutorId):null;
     return '<div class="chave-card '+(pega?'pega':'disponivel')+'">'
-      +'<div class="ch-icon">'+(pega?'🔑':'🗝️')+'</div>'
+      +'<div class="ch-icon">'+(pega?'<i class="ph ph-key"></i>':'<i class="ph ph-key"></i>️')+'</div>'
       +'<div class="ch-info"><div class="ch-nome">'+esc(sala?sala.nome:'—')+' — '+esc(c.codigo||'Chave')+'</div>'
       +'<div class="ch-det">Andar: '+esc(c.andar||'—')+' · <strong>'+(pega?'Retirada':'Disponível')+'</strong></div>'
       +(quem?'<div class="ch-det">Retirada por: '+esc(quem.nome)+(c.pegaEm?' em '+fmtDateTime(c.pegaEm):'')+'</div>':'')
@@ -229,7 +314,7 @@ function _renderChavRec() {
   cont.innerHTML = list.map(function(c){
     var sala=getSalaById(c.salaId); var pega=c.status==='pega'; var quem=pega&&c.instrutorId?getUserById(c.instrutorId):null;
     return '<div class="chave-card '+(pega?'pega':'disponivel')+'">'
-      +'<div class="ch-icon">'+(pega?'🔑':'🗝️')+'</div>'
+      +'<div class="ch-icon">'+(pega?'<i class="ph ph-key"></i>':'<i class="ph ph-key"></i>️')+'</div>'
       +'<div class="ch-info"><div class="ch-nome">'+esc(sala?sala.nome:'—')+' — '+esc(c.codigo||'Chave')+'</div>'
       +'<div class="ch-det">Andar: '+esc(c.andar||'—')+' · <strong>'+(pega?'Retirada':'Disponível')+'</strong></div>'
       +(quem?'<div class="ch-det">Por: '+esc(quem.nome)+(c.pegaEm?' em '+fmtDateTime(c.pegaEm):'')+'</div>':'')

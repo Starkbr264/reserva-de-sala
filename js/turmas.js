@@ -49,7 +49,7 @@ function salvarTurma() {
   const { dados, erros } = _getDadosTurma();
 
   if (erros.length > 0) {
-    showMsg(msg, 'error', '❌ ' + erros.join(' '));
+    showMsg(msg, 'error', '<i class="ph ph-x-circle"></i> ' + erros.join(' '));
     return;
   }
 
@@ -80,7 +80,7 @@ function editarTurma(id) {
   document.getElementById('turmaInicio').value  = turma.dataInicio;
   document.getElementById('turmaFim').value     = turma.dataFim;
 
-  document.getElementById('btnSalvarTurma').textContent = '💾 Atualizar Turma';
+  document.getElementById('btnSalvarTurma').textContent = '<i class="ph ph-floppy-disk"></i> Atualizar Turma';
   document.getElementById('btnCancelarTurma').style.display = 'inline-flex';
   document.getElementById('turmaNome').focus();
   document.getElementById('section-turmas').scrollIntoView({ behavior: 'smooth' });
@@ -130,8 +130,8 @@ function renderTabelaTurmas() {
         <td>${formatDate(t.dataFim)}</td>
         <td><span class="badge ${encerrada ? 'badge-danger' : 'badge-success'}">${encerrada ? 'ENCERRADA' : 'ATIVA'}</span></td>
         <td>
-          <button class="btn btn-warning-sm" onclick="editarTurma(${t.id})">✏️ Editar</button>
-          <button class="btn btn-danger-sm"  onclick="excluirTurma(${t.id})">🗑️ Excluir</button>
+          <button class="btn btn-warning-sm" onclick="editarTurma(${t.id})"><i class="ph ph-pencil-simple"></i>️ Editar</button>
+          <button class="btn btn-danger-sm"  onclick="excluirTurma(${t.id})"><i class="ph ph-trash"></i>️ Excluir</button>
         </td>
       </tr>
     `;
@@ -180,8 +180,8 @@ function _renderTabelaTurmasFiltrada() {
         <td>${formatDate(t.dataFim)}</td>
         <td><span class="badge ${encerrada ? 'badge-danger' : 'badge-success'}">${encerrada ? 'ENCERRADA' : 'ATIVA'}</span></td>
         <td>
-          <button class="btn btn-warning-sm" onclick="editarTurma(${t.id})">✏️ Editar</button>
-          <button class="btn btn-danger-sm"  onclick="excluirTurma(${t.id})">🗑️ Excluir</button>
+          <button class="btn btn-warning-sm" onclick="editarTurma(${t.id})"><i class="ph ph-pencil-simple"></i>️ Editar</button>
+          <button class="btn btn-danger-sm"  onclick="excluirTurma(${t.id})"><i class="ph ph-trash"></i>️ Excluir</button>
         </td>
       </tr>
     `;

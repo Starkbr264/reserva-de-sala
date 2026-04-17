@@ -2,10 +2,10 @@
    js/storage.js — Camada de dados  v2 (com seed completo)
    ================================================================ */
 var _K = {
-  usuarios:'sn_v4_usuarios', unidades:'sn_v4_unidades', salas:'sn_v4_salas',
-  turmas:'sn_v4_turmas', reservas:'sn_v4_reservas', chaves:'sn_v4_chaves',
-  notifs:'sn_v4_notifs', solics:'sn_v4_solics',
-  sessao:'sn_v4_sessao', tema:'sn_v4_tema', init:'sn_v3_init',
+  usuarios:'sn_v6_usuarios', unidades:'sn_v6_unidades', salas:'sn_v6_salas',
+  turmas:'sn_v6_turmas', reservas:'sn_v6_reservas', chaves:'sn_v6_chaves',
+  notifs:'sn_v6_notifs', solics:'sn_v6_solics',
+  sessao:'sn_v6_sessao', tema:'sn_v6_tema', init:'sn_v6_init',
 };
 
 var ADMIN_USER = {
@@ -183,6 +183,22 @@ function initDados() {
     {id:7028,salaId:5028,turmaId:6028,diasSemana:['seg','ter','qua','qui'],      turno:'Matutino',  dataInicio:sd(50),dataFim:ad(70), unidadeId:1010,status:'ATIVA'},
     {id:7029,salaId:5029,turmaId:6029,diasSemana:['seg','qua','sex'],            turno:'Vespertino',dataInicio:sd(25),dataFim:ad(95), unidadeId:1010,status:'ATIVA'},
     {id:7030,salaId:5028,turmaId:6030,diasSemana:['ter','qui'],                  turno:'Noturno',   dataInicio:ad(6), dataFim:ad(36), unidadeId:1010,status:'ATIVA'},
+
+    // ── DEMOS: múltiplos turnos na mesma sala (todos os dias da semana) ──────────
+    // Asa Norte — Lab 01 também reservado no Vespertino (multi-turno visível no mapa)
+    {id:7101,salaId:5001,turmaId:6002,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Vespertino',dataInicio:sd(30),dataFim:ad(90),  unidadeId:1001,status:'ATIVA'},
+    // Asa Norte — Auditório 1: Matutino ativo + Noturno iminente
+    {id:7102,salaId:5003,turmaId:6001,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Matutino',  dataInicio:sd(10),dataFim:ad(60),  unidadeId:1001,status:'ATIVA'},
+    {id:7103,salaId:5003,turmaId:6003,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Noturno',   dataInicio:ad(5), dataFim:ad(45),  unidadeId:1001,status:'ATIVA'},
+    // Taguatinga — Lab Info T01: todos os 3 turnos ocupados hoje
+    {id:7104,salaId:5007,turmaId:6007,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Matutino',  dataInicio:sd(20),dataFim:ad(60),  unidadeId:1003,status:'ATIVA'},
+    {id:7105,salaId:5007,turmaId:6008,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Vespertino',dataInicio:sd(15),dataFim:ad(75),  unidadeId:1003,status:'ATIVA'},
+    // Ceilândia — Sala C01: Matutino ativo + Vespertino em breve (iminente)
+    {id:7106,salaId:5010,turmaId:6012,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Vespertino',dataInicio:ad(5), dataFim:ad(90),  unidadeId:1004,status:'ATIVA'},
+    // Gama — Sala G02: ocupada em todos os turnos
+    {id:7107,salaId:5014,turmaId:6013,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Matutino',  dataInicio:sd(40),dataFim:ad(80),  unidadeId:1005,status:'ATIVA'},
+    {id:7108,salaId:5014,turmaId:6015,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Vespertino',dataInicio:ad(7), dataFim:ad(37),  unidadeId:1005,status:'ATIVA'},
+    {id:7109,salaId:5014,turmaId:6014,diasSemana:['seg','ter','qua','qui','sex','sab'], turno:'Noturno',   dataInicio:sd(25),dataFim:ad(55),  unidadeId:1005,status:'ATIVA'},
   ];
 
   var ts = hj.getTime();
@@ -220,6 +236,32 @@ function initDados() {
   localStorage.setItem(_K.init,'1');
 }
 
+
+/* ── OVERRIDES DE STATUS DE SALA ─────────────────────────────
+   Permitem que coordenação/recepção forcem um status manual
+   para uma sala, independente das reservas do sistema.
+   Formato: { salaId_unidadeId : { status, motivo, por, em } }
+   status: 'ocupada' | 'iminente' | 'livre' | null (remove override)
+   ──────────────────────────────────────────────────────────── */
+var _K_OV = 'sn_v6_overrides';
+
+function getOverrides()          { return _ldO(_K_OV, {}); }
+function setOverride(salaId, unidadeId, status, motivo, nomeUsuario) {
+  var ov = getOverrides();
+  var key = salaId + '_' + unidadeId;
+  if (!status || status === 'auto') {
+    delete ov[key];
+  } else {
+    ov[key] = { status: status, motivo: motivo||'', por: nomeUsuario||'—', em: new Date().toISOString() };
+  }
+  localStorage.setItem(_K_OV, JSON.stringify(ov));
+}
+function getOverride(salaId, unidadeId) {
+  return getOverrides()[salaId + '_' + unidadeId] || null;
+}
+function clearOverride(salaId, unidadeId) {
+  setOverride(salaId, unidadeId, null);
+}
 /* ── SESSÃO ─────── */
 function getSessao()   { return _ldO(_K.sessao,null); }
 function setSessao(u)  { _sv(_K.sessao,u); }
@@ -298,7 +340,15 @@ function deleteReserva(id)     { return delReserva(id); }
 function checarConflito(salaId,turno,dias,ini,fim,ignorarId) {
   var rs=getReservas().filter(function(r){return r.salaId===salaId&&r.turno===turno&&r.id!==ignorarId;});
   for(var i=0;i<rs.length;i++){
-    var r=rs[i];var t=getTurmaById(r.turmaId);
+    var r=rs[i];
+    // Reserva avulsa (sem turma): verificar apenas sobreposição de datas e dias
+    if(r.avulsa||!r.turmaId){
+      if(fim<r.dataInicio||r.dataFim<ini)continue;
+      var comunsA=dias.filter(function(d){return r.diasSemana.includes(d);});
+      if(comunsA.length>0){return 'Conflito com reserva avulsa em '+fmtData(r.dataInicio)+' nos dias '+comunsA.map(function(d){return d.toUpperCase();}).join(', ')+'.';}
+      continue;
+    }
+    var t=getTurmaById(r.turmaId);
     if(t&&calcStatus(t)==='encerrada')continue;
     if(fim<r.dataInicio||r.dataFim<ini)continue;
     var comuns=dias.filter(function(d){return r.diasSemana.includes(d);});

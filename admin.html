@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administrador — SENAC Reservas</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/search.css">
+
 </head>
 <body>
 <div class="layout">
@@ -27,7 +29,7 @@
       <button class="sb-btn" id="nav-salas"    onclick="ir('salas')"><span class="ic">S</span>Salas</button>
       <button class="sb-btn" id="nav-turmas"   onclick="ir('turmas')"><span class="ic">T</span>Turmas</button>
       <button class="sb-btn" id="nav-reservas" onclick="ir('reservas')"><span class="ic">R</span>Reservas</button>
-      <button class="sb-btn" id="nav-chaves"   onclick="ir('chaves')"><span class="ic">🔑</span>Chaves</button>
+      <button class="sb-btn" id="nav-chaves"   onclick="ir('chaves')"><span class="ic"><i class="ph ph-key"></i></span>Chaves</button>
     </nav>
     <div class="sb-foot">
       <div class="sb-user">
@@ -35,7 +37,7 @@
         <div><div class="sb-uname" id="sbNome">—</div><div class="sb-urole">Administrador</div></div>
       </div>
       <button class="btn-sair" onclick="sair()">Sair do sistema</button>
-      <button class="btn-sair" style="margin-top:6px;border-color:var(--red);color:var(--red)" onclick="resetarTodosDados()">⚠️ Resetar dados</button>
+      <button class="btn-sair" style="margin-top:6px;border-color:var(--red);color:var(--red)" onclick="resetarTodosDados()"><i class="ph ph-warning"></i>️ Resetar dados</button>
     </div>
   </aside>
 
@@ -47,7 +49,7 @@
         <div class="tb-sub"   id="tbSub">Visão geral do sistema</div>
       </div>
       <div class="tb-right">
-        <button class="btn-tema" onclick="toggleTema()" title="Alternar tema">◐</button>
+        <button class="btn-tema" onclick="toggleTema()" title="Alternar tema"><i class="ph ph-moon"></i></button>
       </div>
     </header>
 
@@ -165,7 +167,7 @@
 <!-- MODAL USUÁRIO -->
 <div class="modal-overlay" id="modalUser" style="display:none">
   <div class="modal-box" style="max-width:460px">
-    <div class="modal-title"><span id="mUTitulo">Novo Usuário</span><button class="modal-close" onclick="fecharUser()">✕</button></div>
+    <div class="modal-title"><span id="mUTitulo">Novo Usuário</span><button class="modal-close" onclick="fecharUser()"><i class="ph ph-x"></i></button></div>
     <div class="fg" style="gap:12px">
       <div class="ff"><label>Nome completo *</label><input type="text" id="mUNome" placeholder="Nome completo"></div>
       <div class="ff"><label>E-mail *</label><input type="email" id="mUEmail" placeholder="email@senac.br"></div>
@@ -192,7 +194,7 @@
 <!-- MODAL UNIDADE -->
 <div class="modal-overlay" id="modalUnid" style="display:none">
   <div class="modal-box">
-    <div class="modal-title"><span id="mNTitulo">Nova Unidade</span><button class="modal-close" onclick="fecharUnid()">✕</button></div>
+    <div class="modal-title"><span id="mNTitulo">Nova Unidade</span><button class="modal-close" onclick="fecharUnid()"><i class="ph ph-x"></i></button></div>
     <div class="fg">
       <div class="ff"><label>Nome *</label><input type="text" id="mNNome" placeholder="Ex.: CPS Taguatinga"></div>
       <div class="ff"><label>Endereço</label><input type="text" id="mNEndereco" placeholder="Rua, número, bairro"></div>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instrutor — SENAC Reservas</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/search.css">
+
 </head>
 <body>
 <div class="layout">
@@ -33,7 +35,7 @@
   <div class="main">
     <header class="topbar">
       <div><div class="tb-title" id="tbTitle">Minhas Turmas</div><div class="tb-sub" id="tbSub"></div></div>
-      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()">◐</button></div>
+      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()"><i class="ph ph-moon"></i></button></div>
     </header>
 
     <!-- TURMAS -->
@@ -54,7 +56,7 @@
     <div class="pg" id="pg-salas">
       <div class="card"><div class="card-head"><div class="card-title">Disponibilidade de Salas</div>
         <button class="btn btn-ghost btn-sm" onclick="rdSalas()">Atualizar</button></div>
-        <div class="sala-map" id="listaSalas"></div>
+        <div id="listaSalas" class="mapa-andar-grid" style="margin-top:12px"></div>
       </div>
     </div>
 
@@ -79,16 +81,30 @@
 <div class="modal-overlay" id="modalSolic" style="display:none">
   <div class="modal-box">
     <div class="modal-title">
-      <span>Solicitar Sala: <span id="slNome"></span></span>
-      <button class="modal-close" onclick="modalFechar('modalSolic')" title="Fechar">✕</button>
+      <span>Solicitar Sala: <strong><span id="slNome"></span></strong></span>
+      <button class="modal-close" onclick="modalFechar('modalSolic')" title="Fechar"><i class="ph ph-x"></i></button>
     </div>
     <input type="hidden" id="slSalaId">
     <div class="fg">
-      <div class="ff"><label>Data *</label><input type="date" id="slData"></div>
-      <div class="ff"><label>Turno *</label>
-        <select id="slTurno"><option>Matutino</option><option>Vespertino</option><option>Noturno</option></select></div>
-      <div class="ff"><label>Motivo / Observação</label>
-        <textarea id="slMotivo" placeholder="Descreva o motivo..."></textarea></div>
+      <div class="ff">
+        <label>Data *</label>
+        <input type="date" id="slData" onchange="verificarDisponibilidadeSolic()">
+      </div>
+      <div class="ff">
+        <label>Turnos * <span style="font-weight:400;font-size:.75rem;color:var(--text3)">(selecione um ou mais)</span></label>
+        <div class="chips" id="slTurnosChips" style="margin-top:4px">
+          <div class="chip" data-v="Matutino" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-sun"></i> Matutino</div>
+          <div class="chip" data-v="Vespertino" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-cloud-sun"></i> Vespertino</div>
+          <div class="chip" data-v="Noturno" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-moon"></i> Noturno</div>
+        </div>
+        <div id="slTurnoErro" style="font-size:.82rem;margin-top:6px;display:none"></div>
+      </div>
+      <!-- Banner de disponibilidade em tempo real -->
+      <div id="slDisponibilidade" style="display:none;padding:10px 14px;border-radius:8px;font-size:.83rem;line-height:1.5"></div>
+      <div class="ff">
+        <label>Motivo / Observação</label>
+        <textarea id="slMotivo" placeholder="Descreva o motivo da solicitação..."></textarea>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="modalFechar('modalSolic')">Cancelar</button>

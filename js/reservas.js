@@ -206,14 +206,15 @@ function renderTabelaReservas() {
 
   tbody.innerHTML = reservas.map(r => {
     const sala  = salas.find(s => s.id === r.salaId);
-    const turma = turmas.find(t => t.id === r.turmaId);
+    const turma = r.turmaId ? turmas.find(t => t.id === r.turmaId) : null;
     const diasStr = r.diasSemana.map(d => d.toUpperCase()).join(', ');
     const isAtiva = r.status === 'ATIVA';
+    const turmaLabel = r.avulsa ? '<span class="badge badge-warning">Avulsa</span>' : (turma ? escapeHtml(turma.nome) : '<em>Turma removida</em>');
 
     return `
       <tr>
         <td><strong>${sala ? escapeHtml(sala.nome) : '<em>Sala removida</em>'}</strong></td>
-        <td class="code-text">${turma ? escapeHtml(turma.nome) : '<em>Turma removida</em>'}</td>
+        <td class="code-text">${turmaLabel}</td>
         <td><span class="badge badge-primary">${r.turno}</span></td>
         <td><span style="font-size:.82rem; color:var(--text-muted)">${diasStr}</span></td>
         <td style="font-size:.87rem">${formatDate(r.dataInicio)} → ${formatDate(r.dataFim)}</td>
@@ -264,13 +265,14 @@ function _renderTabelaReservasFiltrada() {
   }
   tbody.innerHTML = reservas.map(r => {
     const sala  = salas.find(s => s.id === r.salaId);
-    const turma = turmas.find(t => t.id === r.turmaId);
+    const turma = r.turmaId ? turmas.find(t => t.id === r.turmaId) : null;
     const diasStr = r.diasSemana.map(d => d.toUpperCase()).join(', ');
     const isAtiva = r.status === 'ATIVA';
+    const turmaLabel = r.avulsa ? '<span class="badge badge-warning">Avulsa</span>' : (turma ? escapeHtml(turma.nome) : '<em>Turma removida</em>');
     return `
       <tr>
         <td><strong>${sala ? escapeHtml(sala.nome) : '<em>Sala removida</em>'}</strong></td>
-        <td class="code-text">${turma ? escapeHtml(turma.nome) : '<em>Turma removida</em>'}</td>
+        <td class="code-text">${turmaLabel}</td>
         <td><span class="badge badge-primary">${r.turno}</span></td>
         <td style="font-size:.82rem;color:var(--text-muted)">${diasStr}</td>
         <td style="font-size:.87rem">${formatDate(r.dataInicio)} → ${formatDate(r.dataFim)}</td>
