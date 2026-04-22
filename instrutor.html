@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instrutor — SENAC Reservas</title>
+
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo-wrap" id="logoWrap"><img id="logoImg" src="img/senac-logo-sem-fundo.webp" alt="SENAC"></div>
+      <div class="sb-nome" id="logoTxt">SENAC · GDF</div>
+      <div class="sb-sub" id="sbUnidade"></div>
+      <span class="sb-badge instrutor">Instrutor</span>
+    </div>
+    <nav class="sb-nav">
+      <span class="sb-section">Meu Painel</span>
+      <button class="sb-btn" id="nav-turmas"  onclick="ir('turmas')"> <span class="ic">T</span>Minhas Turmas</button>
+      <button class="sb-btn" id="nav-salas"   onclick="ir('salas')">  <span class="ic">S</span>Solicitar Sala</button>
+      <button class="sb-btn" id="nav-chaves"  onclick="ir('chaves')"> <span class="ic">C</span>Chaves</button>
+      <button class="sb-btn" id="nav-notifs"  onclick="ir('notifs')"> <span class="ic">N</span>Notificações
+        <span class="sb-notif" id="badgeNotif" style="display:none">0</span></button>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user"><div class="sb-avatar" id="sbIniciais">IN</div>
+        <div><div class="sb-uname" id="sbNome">—</div><div class="sb-urole">Instrutor</div></div></div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div><div class="tb-title" id="tbTitle">Minhas Turmas</div><div class="tb-sub" id="tbSub"></div></div>
+      <div class="tb-right"><button class="btn-tema" onclick="toggleTema()"><i class="ph ph-moon"></i></button></div>
+    </header>
+
+    <!-- TURMAS -->
+    <div class="pg ativa" id="pg-turmas">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Turmas Atribuídas a Mim <span class="count-badge" id="countTurmasInst"></span></div>
+        </div>
+        <div id="searchTurmasInst"></div>
+        <div class="tw"><table class="tbl">
+          <thead><tr><th>Código</th><th>Curso</th><th>Turno</th><th>Sala Reservada</th><th>Status</th><th>Período</th></tr></thead>
+          <tbody id="tbTurmas"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- SOLICITAR SALA -->
+    <div class="pg" id="pg-salas">
+      <div class="card"><div class="card-head"><div class="card-title">Disponibilidade de Salas</div>
+        <button class="btn btn-ghost btn-sm" onclick="rdSalas()">Atualizar</button></div>
+        <div id="listaSalas" class="mapa-andar-grid" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- CHAVES -->
+    <div class="pg" id="pg-chaves">
+      <div class="card"><div class="card-title">Chaves</div>
+        <p class="txt2" style="margin-bottom:14px">Sinalize ao retirar ou devolver uma chave. A recepção será notificada.</p>
+        <div id="listaChaves"></div>
+      </div>
+    </div>
+
+    <!-- NOTIFS -->
+    <div class="pg" id="pg-notifs">
+      <div class="card"><div class="card-title">Notificações</div>
+        <div id="listaNotifs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SOLICITAÇÃO -->
+<div class="modal-overlay" id="modalSolic" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>Solicitar Sala: <strong><span id="slNome"></span></strong></span>
+      <button class="modal-close" onclick="modalFechar('modalSolic')" title="Fechar"><i class="ph ph-x"></i></button>
+    </div>
+    <input type="hidden" id="slSalaId">
+    <div class="fg">
+      <div class="ff">
+        <label>Data *</label>
+        <input type="date" id="slData" onchange="verificarDisponibilidadeSolic()">
+      </div>
+      <div class="ff">
+        <label>Turnos * <span style="font-weight:400;font-size:.75rem;color:var(--text3)">(selecione um ou mais)</span></label>
+        <div class="chips" id="slTurnosChips" style="margin-top:4px">
+          <div class="chip" data-v="Matutino" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-sun"></i> Matutino</div>
+          <div class="chip" data-v="Vespertino" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-cloud-sun"></i> Vespertino</div>
+          <div class="chip" data-v="Noturno" onclick="this.classList.toggle('ativo');verificarDisponibilidadeSolic()"><i class="ph ph-moon"></i> Noturno</div>
+        </div>
+        <div id="slTurnoErro" style="font-size:.82rem;margin-top:6px;display:none"></div>
+      </div>
+      <!-- Banner de disponibilidade em tempo real -->
+      <div id="slDisponibilidade" style="display:none;padding:10px 14px;border-radius:8px;font-size:.83rem;line-height:1.5"></div>
+      <div class="ff">
+        <label>Motivo / Observação</label>
+        <textarea id="slMotivo" placeholder="Descreva o motivo da solicitação..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="modalFechar('modalSolic')">Cancelar</button>
+      <button class="btn btn-primary" onclick="enviarSolic()">Enviar Solicitação</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="js/storage.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/search.js"></script>
+<script src="js/instrutor_page.js"></script>
+</body>
+</html>

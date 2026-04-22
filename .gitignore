@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Node / frontend ###
+node_modules/
+.DS_Store
+.env
+dist/
+npm-debug.log

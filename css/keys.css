@@ -1,0 +1,33 @@
+/* ================================================================
+   keys.css — Cards de chaves (gestão de chaves físicas das salas)
+   ================================================================ */
+.chave-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  transition: var(--t);
+}
+.chave-card:hover { border-color: var(--border2); }
+
+.ch-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.chave-card.disponivel .ch-icon { background: var(--green-l); }
+.chave-card.pega       .ch-icon { background: var(--red-l);   }
+
+.ch-info { flex: 1; }
+.ch-nome { font-weight: 600; color: var(--text);  font-size: .9rem; }
+.ch-det  { font-size: .78rem; color: var(--text2); margin-top: 2px; }
